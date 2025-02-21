@@ -1,0 +1,38 @@
+fastapi==0.95.2
+loguru==0.7.0
+peewee==3.15.4
+peewee_async==0.8.0
+python-dotenv==0.21.1
+aiopg==1.4.0
+orjson==3.8.14
+psycopg2==2.9.5
+# psycopg2-binary
+uvicorn==0.22
+fastapi-sso
+# passlib==1.7.1
+# bcrypt
+python-jose
+feedgen
+socksio
+
+# API
+python-multipart
+
+#crawler
+celery==5.2.7
+celery_once==3.0.1
+kombu==5.2.4
+aiohttp==3.8.4
+aiodns==3.0.0
+pyquery==2.0.0
+pyyaml==6.0
+six==1.16.0
+Macropodus==0.0.7
+numpy==1.23
+sentry_sdk
+openai
+js2py
+xmltodict
+brotlipy
+tencentcloud-sdk-python-tmt
+

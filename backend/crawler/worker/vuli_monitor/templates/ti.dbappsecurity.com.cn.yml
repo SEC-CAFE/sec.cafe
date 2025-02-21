@@ -1,0 +1,49 @@
+name: 安恒星图平台
+homepage: https://ti.dbappsecurity.com.cn/vul
+priority: 4
+crawl_list:
+  content_format: json
+  if_nuxt: true
+  url: https://ti.dbappsecurity.com.cn/vul
+crawl_detail:
+  content_format: html
+  url: <url>
+list_selector: data
+list_value_selectors:
+  url: 
+    selector: holeCode
+    build: https://ti.dbappsecurity.com.cn/vul/<url>
+  tag_num:
+    selector: holeCode
+  level:
+    selector: cvssHoleLevelName
+    map:
+      超危: 4
+      低危: 1
+      中危: 2
+      高危: 3
+  title:
+    selector: holeName
+  vul_category:
+    selector: cweTypePlatformName
+  components:
+    selector: companyName
+  publish_time:
+    selector: checkTime
+  cnnvd:
+    selector: cnnvd
+  cnvd:
+    selector: cnvd
+  cve:
+    selector: cve
+  poc_status:
+    selector: pocExist<|>expExist
+    exists_map:
+      expExist: "Exp<|>"
+      pocExist: "PoC<|>"
+    choise_one: true
+detail_value_selectors:
+  descript:
+    selector: .detail-desc:eq(0)
+    value_attr: text
+  

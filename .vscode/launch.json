@@ -1,0 +1,129 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: 当前文件",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Backend",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "module": "uvicorn",
+            "args":[
+                "main:app",
+                "--port",
+                "8000",
+                "--reload",
+                
+            ]
+        },
+        {
+            "name": "API",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "module": "uvicorn",
+            "args":[
+                "run_api:app",
+                "--port",
+                "8000",
+                "--reload",
+                
+            ]
+        },
+        {
+            "name": "crawler_scheduler",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "program": "${workspaceFolder}/venv/bin/celery",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-A",
+                "crawler.scheduler.app",
+                "worker",
+                "-l",
+                "info",
+                "-Q",
+                "task.task_creator,task.result_handler",
+                "--beat",
+                "-n",
+                "crawler-scheduler"
+            ]
+        },
+        {
+            "name": "crawler_worker",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "program": "${workspaceFolder}/venv/bin/celery",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-A",
+                "crawler.scheduler.app",
+                "worker",
+                "-l",
+                "info",
+                "-Q",
+                "task.vuli_monitor.crawler_list,task.vuli_monitor.crawler_detail",
+                "--concurrency=1",
+                "-n",
+                "crawler-worker"
+            ]
+        },
+        {
+            "name": "pusher_scheduler",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "program": "${workspaceFolder}/venv/bin/celery",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-A",
+                "crawler.scheduler.app",
+                "worker",
+                "-l",
+                "info",
+                "-Q",
+                "task.vuli_pusher.create_task",
+                "--beat",
+                "-n",
+                "pusher-scheduler"
+            ]
+        },
+        {
+            "name": "pusher_worker",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "program": "${workspaceFolder}/venv/bin/celery",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-A",
+                "crawler.scheduler.app",
+                "worker",
+                "-l",
+                "info",
+                "-Q",
+                "task.vuli_pusher.mail,task.vuli_pusher.qiyeweixin,task.vuli_pusher.dingding,task.vuli_pusher.feishu,task.vuli_pusher.custom",
+                "--concurrency=1",
+                "-n",
+                "pusher-worker"
+            ]
+        },
+        
+    ]
+}

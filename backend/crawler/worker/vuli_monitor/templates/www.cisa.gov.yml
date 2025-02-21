@@ -1,0 +1,28 @@
+name: CISA KEV
+homepage: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+priority: 2
+translate: true
+interval_hours: 24
+sort: -dateAdded
+list_limit: 10
+crawl_list:
+  content_format: json
+  url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+crawl_detail:
+  content_format: json
+  url: <url>
+list_selector: vulnerabilities
+list_value_selectors:
+  url: 
+    selector: cveID
+    build: https://nvd.nist.gov/vuln/detail/<url>
+  title:
+    selector: vulnerabilityName
+  publish_time:
+    selector: dateAdded
+  cve:
+    selector: cveID
+  descript:
+    selector: shortDescription
+  cews:
+    selector: cwes

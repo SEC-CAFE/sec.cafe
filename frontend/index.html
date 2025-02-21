@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="poweredby" content="https://sec.cafe">
+    <title>SEC.CAFE 安全咖啡</title>
+    <script>
+      if (localStorage.getItem('dark-mode') === 'false' || !('dark-mode' in localStorage)) {
+        document.querySelector('html').classList.remove('dark');
+      } else {
+        document.querySelector('html').classList.add('dark');
+      }
+    </script>
+  </head>
+  <body class="font-inter antialiased bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200 tracking-tight h-full">
+    <div id="app" class="h-full"></div>
+    <script type="module" src="/src/main.js"></script>
+    <script>
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?a11dd0bea4220152f54de2eee4c6828c";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+      </script>
+  </body>
+</html>

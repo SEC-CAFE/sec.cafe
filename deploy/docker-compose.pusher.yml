@@ -1,0 +1,23 @@
+services:
+    pusher-scheduler:
+        image: sec_cafe_backend:1.0
+        container_name: pusher-scheduler
+        env_file:
+            - .env
+        network_mode: host
+        volumes:
+            - .:/app
+            - /etc/localtime:/etc/localtime
+        command: "celery -A crawler.scheduler.app worker -l info -Q task.vuli_pusher.create_task --beat -n pusher-scheduler"
+        restart: always
+    pusher-worker:
+        image: sec_cafe_backend:1.0
+        container_name: pusher-worker
+        env_file:
+            - .env
+        network_mode: host
+        volumes:
+            - .:/app
+            - /etc/localtime:/etc/localtime
+        command: "celery -A crawler.scheduler.app worker -l info -Q task.vuli_pusher.mail,task.vuli_pusher.qiyeweixin,task.vuli_pusher.dingding,task.vuli_pusher.feishu,task.vuli_pusher.custom --concurrency=10 -n pusher-worker"
+        restart: always

@@ -1,0 +1,78 @@
+name: 深信服漏洞情报
+homepage: https://sec.sangfor.com.cn/security-vulnerability
+priority: 4
+crawl_list:
+  content_format: json
+  url: https://sec.sangfor.com.cn/api/v1/vuln/list?page_index=1&page_size=15&sort_order=-1&sort_field=discover_date&external_tags=623d7840032c8a8d5198764c%2C62ea79b599499ba1ab896374%2C62e771fc99499ba1abd6dcac%2C64a2417010f68f0059f4a80a%2C64a2407510f68f00579bb6c0%2C623d7b9c032c8a8d51990164%2C623d7900032c8a8d51988c31
+  headers:
+    Referer: https://sec.sangfor.com.cn/security-vulnerability
+  params: 
+  method: get
+  pre_req:
+    url: https://sec.sangfor.com.cn/api/v1/wiki-language/set_language
+    params: lang=ZH-CN
+    method: post
+  filter:
+    level: =4
+
+crawl_detail:
+  content_format: json
+  url: https://sec.sangfor.com.cn/api/v1/vuln/info?vuln_sfv=<tag_num>
+  headers:
+    Referer: https://sec.sangfor.com.cn/security-vulnerability/detail?vuln_sfv=<tag_num>&lang=ZH-CN
+  params: 
+  method: get
+  pre_req:
+    url: https://sec.sangfor.com.cn/api/v1/wiki-language/set_language
+    params: lang=ZH-CN
+    method: post
+list_selector: data
+list_value_selectors:
+  url: 
+    selector: vuln_sfv
+    build: https://sec.sangfor.com.cn/security-vulnerability/detail?vuln_sfv=<url>&lang=ZH-CN
+  tag_num:
+    selector: vuln_sfv
+  title:
+    selector: vuln_name
+  publish_time:
+    selector: discover_date<|>update_time
+    choise_one: true
+  cve:
+    selector: cve
+  level:
+    selector: level
+    map:
+      "100": 1
+      "101": 2
+      "102": 3
+      "103": 4
+  poc_status:
+    selector: vuln_status
+    value_index: 2
+    map:
+      0: ""
+      1: "PoC"
+detail_value_selectors:
+  vul_category:
+    selector: data/vuln_type_name
+  descript:
+    selector: data/vuln_describe
+  cnvd:
+    selector: data/cnvd
+  cnnvd:
+    selector: data/cnnvd
+  reference_links:
+    selector: data/reference_link
+  tags:
+    selector: data/tags_name
+  components:
+    selector: data/object
+  patch:
+    selector: data/vuln_solution
+    exists_map:
+      patch: "1<|>0"
+  cwes:
+    selector: data/cwe
+  cvss:
+    selector: data/cvss_score

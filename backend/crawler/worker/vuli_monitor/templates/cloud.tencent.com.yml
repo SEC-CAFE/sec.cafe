@@ -1,0 +1,36 @@
+name: 腾讯云安全公告
+homepage: https://cloud.tencent.com/announce/?categorys=21
+priority: 4
+crawl_list:
+  content_format: html
+  url: https://cloud.tencent.com/announce/?categorys=21
+crawl_detail:
+  content_format: html
+  url: <url>
+list_selector: .msg-list-bd .msg-list-item
+list_value_selectors:
+  url: 
+    selector: a
+    value_attr: href
+  title:
+    selector: a
+    value_attr: text
+  publish_time:
+    selector: .msg-list-aside span
+    value_attr: text
+detail_value_selectors:
+  level:
+    selector: .msg-d-bd
+    value_attr: textContent
+    regx: '风险等级(.*?)漏洞风险'
+    split_tag: '（'
+    value_index: 1
+    map:
+      低风险: 1
+      中风险: 2
+      高风险: 3
+      严重: 4
+  descript:
+    selector: .msg-d-bd
+    value_attr: textContent
+    regx: '漏洞详情\s?(.*?)风险等级'

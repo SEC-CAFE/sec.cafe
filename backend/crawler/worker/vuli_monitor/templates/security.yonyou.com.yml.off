@@ -1,0 +1,48 @@
+name: 用友安全中心
+homepage: https://security.yonyou.com/#/noticeList
+priority: 1
+crawl_list:
+  content_format: json
+  url: https://security.yonyou.com/src/front/notice/page
+  headers:
+    Referer: https://security.yonyou.com/
+    Content-Type: application/json;charset=UTF-8
+  params: '{"currentPage":1,"limit":10,"productLine":"","notice":"","isFlag":""}'
+  method: post
+crawl_detail:
+  content_format: json
+  url: https://security.yonyou.com/#/noticeInfo?id=<tag_num>
+  headers:
+  params: 
+  method: get
+list_selector: result/list
+list_value_selectors:
+  url: 
+    selector: id
+    build: https://security.yonyou.com/#/noticeInfo?id=<url>
+  tag_num:
+    selector: id
+  title:
+    selector: noticeName
+  publish_time:
+    selector: createTime
+  level:
+    selector: holeLevelName
+    map:
+      低危: 1
+      中危: 2
+      高危: 3
+      严重: 4
+  cvss:
+    selector: cvssScore
+  descript:
+    selector: description
+    break_keyword:
+      - 二、影响版本
+    split_tag: '一、漏洞描述'
+    value_index: 2
+    clean_html_tag: true
+  components:
+    selector: productLineName
+  patch:
+    selector: "@1"

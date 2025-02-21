@@ -1,0 +1,59 @@
+name: Seebug 漏洞平台
+homepage: https://www.seebug.org
+priority: 4
+crawl_list:
+  content_format: html
+  url: https://www.seebug.org/vuldb/vulnerabilities?order_time=0&order_rank=1&level=high&submitTime=month
+  headers:
+    cookies: '__jsl_clearance_s=1705050066.994|-1|iCZr0RnU1%2FcM%2Fr5VjRAo1kyeFyY%3D; Max-age=3600; Path=/; SameSite=None; Secure'
+crawl_detail:
+  content_format: html
+  url: <url>
+list_selector: table tbody tr
+list_value_selectors:
+  url: 
+    selector: td:nth-child(1) a
+    value_attr: href
+  tag_num:
+    selector: td:nth-child(1) a
+    value_attr: text
+  title:
+    selector: td:nth-child(4)
+    value_attr: text
+  cve:
+    selector: td:nth-child(5) i:nth-child(1)
+    value_attr: data-original-title
+    map:
+      无 CVE: ""
+  poc_status:
+    selector: td:nth-child(5) i:nth-child(2)
+    value_attr: data-original-title
+    map:
+      无 PoC: ""
+      有 PoC: "PoC"
+  publish_time:
+    selector: td:nth-child(2)
+    value_attr: text
+  level:
+    selector: '@3'
+detail_value_selectors:
+  vul_category:
+    selector: .vul-basic-info div div:eq(1) dl:eq(0) dd a
+    value_attr: text
+  components:
+    selector: .vul-basic-info div div:eq(1) dl:eq(1) dd a
+    value_attr: text
+  cnvd:
+    selector: .vul-basic-info div div:eq(2) dl:eq(2) dd a
+    value_attr: text
+    map:
+      补充 : ""
+  cnnvd:
+    selector: .vul-basic-info div div:eq(2) dl:eq(1) dd a
+    value_attr: text
+    map:
+      补充 : ""
+  reference_links:
+    selector: .solution-txt:eq(0) div div ul li a
+    value_attr: href
+

@@ -1,0 +1,39 @@
+name: 微步在线X情报社区
+homepage: https://x.threatbook.com/v5/vul/notice
+priority: 3
+crawl_list:
+  content_format: json
+  url: https://x.threatbook.com/v5/node/vul_module/notice/page?page=1&pageSize=10
+  method: get
+crawl_detail:
+  content_format: json
+  url: <url>
+  method: get
+list_selector: data/items
+list_value_selectors:
+  url: 
+    selector: xveId
+    build: https://x.threatbook.com/v5/vul/<url>
+  tag_num:
+    selector: xveId
+  title:
+    selector: title
+  publish_time:
+    selector: publishTime
+  level:
+    selector: grade
+    map:
+      低危: 1
+      中危: 2
+      高危: 3
+      严重: 4
+  cve:
+    selector: cveId
+  descript:
+    selector: version
+  components:
+    selector: version
+    split_tag: '\n'
+    choise_value_one: true
+  tags:
+    selector: tags

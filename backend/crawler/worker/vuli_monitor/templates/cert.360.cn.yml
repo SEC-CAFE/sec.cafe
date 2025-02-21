@@ -1,0 +1,46 @@
+name: 360网络安全响应中心
+homepage: https://cert.360.cn/warning
+priority: 4
+crawl_list:
+  content_format: json
+  url: https://cert.360.cn/warning/searchbypage?length=6&start=0
+  filter:
+    title: 漏洞通告
+crawl_detail:
+  content_format: html
+  url: <url>
+list_selector: data
+list_value_selectors:
+  url: 
+    selector: id
+    build: https://cert.360.cn/warning/detail?id=<url>
+  title:
+    selector: title
+  publish_time:
+    selector: add_time_str
+detail_value_selectors:
+  tag_num:
+    selector: .news-conent
+    value_attr: textContent
+    regx: '报告编号：(.*?)报告来源：'
+  level:
+    selector: .news-conent
+    value_attr: textContent
+    regx: '威胁等级(.*?)影响面'
+    map:
+      低危: 1
+      中危: 2
+      高危: 3
+      严重: 4
+  vul_category:
+    selector: .news-conent
+    value_attr: textContent
+    regx: '漏洞类型:\s?(.*?)实际影响:'
+  components:
+    selector: .news-conent
+    value_attr: textContent
+    regx: '组件:\s?(.*?)漏洞类型: '
+  descript:
+    selector: .news-conent
+    value_attr: textContent
+    regx: '简述:\s?(.*?)0x04'

@@ -1,0 +1,89 @@
+services:
+    pgsql:
+        container_name: pgsql
+        hostname: pgsql
+        image: postgres:14-alpine
+        env_file:
+            - .env
+        ports:
+            - ${POSTGRES_PORT}:5432
+        volumes:
+            - ./data/pgsql:/var/lib/postgresql/data
+            - ./pgsql.conf:/etc/postgresql/postgresql.conf
+            - ./log/pgsql:/var/log/postgresql
+            - /etc/localtime:/etc/localtime
+
+        command: "postgres -c config_file=/etc/postgresql/postgresql.conf"
+        networks:
+            db:
+                ipv4_address: 172.28.8.8
+        restart: always
+        
+
+    rabbitmq:
+        container_name: rabbitmq
+        hostname: rabbitmq
+        env_file:
+            - .env
+        image: rabbitmq:3.11.9-management-alpine
+        ports:
+            - ${RABBITMQ_PORT}:5672
+            - ${RABBITMQ_UI_PORT}:15672
+        volumes:
+            - ./data/rabbitmq:/var/lib/rabbitmq
+            - ./log/rabbitmq:/var/log/rabbitmq
+            - /etc/localtime:/etc/localtime
+        networks:
+            db:
+                ipv4_address: 172.28.8.9
+        restart: always
+    redis:
+        container_name: redis
+        hostname: redis
+        env_file:
+            - .env
+        image: redis:alpine
+        command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+        ports:
+            - "${REDIS_PORT}:6379"
+        volumes:
+            - ./data/redis:/data
+            - ./log/redis:/var/log/redis
+            - /etc/localtime:/etc/localtime
+        networks:
+            db:
+                ipv4_address: 172.28.8.10
+        restart: always
+    pgbackups:
+        image: prodrigestivill/postgres-backup-local
+        restart: always
+        user: postgres:postgres # Optional: see below
+        volumes:
+            - /data/bak/pgbackups:/backups
+        links:
+            - pgsql
+        depends_on:
+            - pgsql
+        env_file:
+            - .env
+        environment:
+            - POSTGRES_HOST=172.28.8.10
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_PORT=${POSTGRES_PORT}
+            - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+            - SCHEDULE=@daily
+            - BACKUP_KEEP_DAYS=7
+            - BACKUP_KEEP_WEEKS=4
+            - BACKUP_KEEP_MONTHS=6
+            - HEALTHCHECK_PORT=9090
+        networks:
+            db:
+                ipv4_address: 172.28.8.11
+
+networks:
+  db:
+    ipam:
+      config:
+      - subnet: 172.28.8.0/24

@@ -1,0 +1,31 @@
+name: 绿盟威胁情报中心
+homepage: https://nti.nsfocus.com/threatNotice
+priority: 3
+crawl_list:
+  content_format: json
+  url: https://nti.nsfocus.com/api/v2/report/notie/?page=1&size=10&order=reported
+  method: get
+  filter:
+    title: re_[^微软]*漏洞.*通告
+crawl_detail:
+  content_format: json
+  url: <url>
+  method: get
+list_selector: data
+list_value_selectors:
+  url: 
+    selector: children/[0]/file_name
+    build: https://nti.nsfocus.com/api/v2/report/pdf/?file=<url>
+  tag_num:
+    selector: id
+  title:
+    selector: title
+  publish_time:
+    selector: reported
+    split_tag: 'T'
+    choise_value_one: true
+  cve:
+    selector: cve_ids
+    value_index: 1
+  descript:
+    selector: children/[0]/description

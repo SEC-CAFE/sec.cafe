@@ -1,0 +1,98 @@
+name: 长亭漏洞库
+homepage: https://stack.chaitin.com/vuldb/index
+priority: 2
+crawl_list:
+  content_format: json
+  url: https://stack.chaitin.com/api/v2/vuln/list/?limit=15&offset=0&search=
+crawl_detail:
+  content_format: json
+  url: <url>
+list_selector: data/list
+list_value_selectors:
+  url: 
+    selector: id
+    build: /vuldb/detail?id=<url>
+  tag_num:
+    selector: ct_id
+  title:
+    selector: title
+  patch:
+    selector: patch_date
+    exists_map:
+      patch: "1<|>0"
+  poc_status:
+    selector: poc_disclosure_date<|>exp_disclosure_date
+    exists_map:
+      exp_disclosure_date: "Exp<|>"
+      poc_disclosure_date: "PoC<|>"
+    choise_one: true
+  publish_time:
+    selector: disclosure_date<|>created_at
+    choise_one: true
+  level:
+    selector: severity
+    map:
+      low: 1
+      medium: 2
+      high: 3
+      critical: 4
+  cve:
+    selector: cve_id
+  cnvd:
+    selector: cnvd_id
+  cnnvd:
+    selector: cnnvd_id
+  descript:
+    selector: summary
+  reference_links:
+    selector: references
+    split_tag: " "
+  vul_category:
+    selector: weakness
+    map:
+      backdoor: 后门
+      buffer_overflow: 缓冲区溢出
+      click_jacking: 点击劫持
+      cors: 跨域
+      crlf: CRLF注入
+      cryptography_problem: 密码学问题
+      csrf: CSRF
+      default_passord: 默认账户口令
+      deserialization: 反序列化漏洞
+      directory_traversal: 路径遍历
+      dos: 拒绝服务
+      double_free: 双重释放
+      enum: 枚举
+      file_delete: 文件删除
+      file_inclusion: 文件包含
+      file_upload: 文件上传
+      heap_overflow: 堆溢出
+      idor: 鉴权绕过
+      integer_overflow: 整数溢出
+      ldap_injection: LDAP注入
+      leak: 敏感信息泄露
+      logical: 逻辑漏洞
+      memory_safety: 内存安全
+      other: 其他
+      out_of_bounds: 越界访问
+      race_condition: 条件竞争
+      rce: 远程代码执行
+      readfile: 文件读取
+      rpo: 相对路径覆盖
+      sql_injection: SQL注入
+      ssrf: SSRF
+      ssti: SSTI
+      stack_overflow: 栈溢出
+      type_confusion: 类型混淆
+      unauthorized_access: 未授权访问
+      uncontrolled_format_string: 格式化字符串
+      uninitialized_variable: 未初始化变量
+      unsafe_account: 账户认证体系漏洞
+      unsafe_config: 不安全的配置
+      url_redirection: URL跳转
+      use_after_free: 释放后重引用
+      weak_password: 弱口令
+      writefile: 文件写入
+      xpath_injection: XPath注入
+      xss: XSS
+      xxe: XXE

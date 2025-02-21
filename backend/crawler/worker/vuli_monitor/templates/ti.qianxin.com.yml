@@ -1,0 +1,62 @@
+name: 奇安信威胁情报中心
+homepage: https://ti.qianxin.com/
+priority: 3
+crawl_list:
+  content_format: json
+  url: https://ti.qianxin.com/alpha-api/v2/vuln/one-day
+  method: post
+crawl_detail:
+  content_format: json
+  url: https://nox.qianxin.com/api/web/portal/vuln_repo/show
+  headers:
+    Key: :LXHGJYE72DNSR62KADVCIXVKGFWN5QEQ
+    Access-Token: da0d61ba189195d349d51214fff9008d
+    Referer: https://nox.qianxin.com/vulnerability/detail/<tag_num>
+  params: '{"id":<v_id>}'
+  method: post
+list_selector: data/key_vuln_add
+list_value_selectors:
+  v_id:
+    selector: id
+  url: 
+    selector: id
+    build: https://ti.qianxin.com/vulnerability/detail/<url>
+  tag_num:
+    selector: qvd_code
+  title:
+    selector: vuln_name
+  publish_time:
+    selector: publish_time<|>create_time
+    choise_one: true
+  cve:
+    selector: cve_code
+  cnvd:
+    selector: cnvd_id
+  cnnvd:
+    selector: cnnvd_id
+  vul_category:
+    selector: threat_category
+  descript:
+    selector: description
+  level:
+    selector: rating_level
+    map:
+      低危: 1
+      中危: 2
+      高危: 3
+      极危: 4
+  poc_status:
+    selector: poc_flag
+    map:
+      1: "PoC"
+  patch:
+    selector: patch_flag
+  tags:
+    selector: tag/name
+detail_value_selectors:
+  cvss:
+    selector: data/info/value?label=CVSS 3.X
+    split_tag: ' '
+    choise_value_one: true
+  components:
+    selector: data/info/value?label=产品

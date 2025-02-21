@@ -1,0 +1,68 @@
+name: 奇安信NOX漏洞库
+homepage: https://nox.qianxin.com/KeyPoint
+priority: 2
+crawl_list:
+  content_format: json
+  url: https://nox.qianxin.com/api/web/portal/key_vuln/list
+  headers:
+    Key: :LXHGJYE72DNSR62KADVCIXVKGFWN5QEQ
+    Access-Token: da0d61ba189195d349d51214fff9008d
+    Referer: https://nox.qianxin.com/KeyPoint
+  params: '{"page_no":1,"page_size":10,"vuln_keyword":""}'
+  method: post
+crawl_detail:
+  content_format: json
+  url: https://nox.qianxin.com/api/web/portal/vuln_repo/show
+  headers:
+    Key: :LXHGJYE72DNSR62KADVCIXVKGFWN5QEQ
+    Access-Token: da0d61ba189195d349d51214fff9008d
+    Referer: https://nox.qianxin.com/vulnerability/detail/<tag_num>
+  params: '{"id":<v_id>}'
+  method: post
+list_selector: data/data
+list_value_selectors:
+  v_id:
+    selector: id
+  url: 
+    selector: qvd_code
+    build: https://nox.qianxin.com/vulnerability/detail/<url>
+  tag_num:
+    selector: qvd_code
+  title:
+    selector: vuln_name
+  publish_time:
+    selector: publish_time<|>create_time
+    choise_one: true
+  cve:
+    selector: cve_code
+  cnvd:
+    selector: cnvd_id
+  cnnvd:
+    selector: cnnvd_id
+  vul_category:
+    selector: threat_category
+  descript:
+    selector: description
+  level:
+    selector: rating_level
+    map:
+      低危: 1
+      中危: 2
+      高危: 3
+      极危: 4
+  components:
+    selector: qpe_prod_name
+    split_tag: ','
+  poc_status:
+    selector: poc_flag<|>used_flag
+    exists_map:
+      used_flag: "Exp<|>"
+      poc_flag: "PoC<|>"
+    choise_one: true
+  tags:
+    selector: tag/name
+detail_value_selectors:
+  cvss:
+    selector: data/info/value?label=CVSS 3.X
+    split_tag: ' '
+    choise_value_one: true

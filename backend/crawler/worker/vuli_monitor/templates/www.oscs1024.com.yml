@@ -1,0 +1,59 @@
+name: OSCS开源安全情报
+homepage: https://www.oscs1024.com/cm
+priority: 3
+crawl_list:
+  content_format: json
+  url: https://www.oscs1024.com/oscs/v1/intelligence/list
+  params: '{"page":1,"per_page":10}'
+  method: post
+  filter:
+    level: =3,4
+    v_id: =1
+crawl_detail:
+  content_format: json
+  url: https://www.oscs1024.com/oscs/v1/vdb/info
+  params: '{"vuln_no":"<tag_num>"}'
+  method: post
+  headers:
+    content-type: application/json
+list_selector: data/data
+list_value_selectors:
+  v_id:
+    selector: is_push
+  url: 
+    selector: url
+  tag_num:
+    selector: mps
+  title:
+    selector: title
+  publish_time:
+    selector: public_time<|>created_at
+    choise_one: true
+  level:
+    selector: level
+    map:
+      低危: 1
+      中危: 2
+      高危: 3
+      严重: 4
+  poc_status:
+    selector: is_poc<|>is_exp
+    exists_map:
+      used_flag: "Exp<|>"
+      poc_flag: "PoC<|>"
+    choise_one: true
+detail_value_selectors:
+  components:
+    selector: data/[0]/effect/name
+  cve:
+    selector: data/[0]/cve_id
+  cnvd:
+    selector: data/[0]/cnvd_id
+  vul_category:
+    selector: data/[0]/vuln_type
+  descript:
+    selector: data/[0]/description
+  cvss:
+    selector: data/[0]/cvss_score
+  reference_links:
+    selector: data/[0]/references/url

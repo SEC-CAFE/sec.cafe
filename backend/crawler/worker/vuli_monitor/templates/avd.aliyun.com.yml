@@ -1,0 +1,83 @@
+name: 阿里云漏洞库(AVD)
+homepage: https://avd.aliyun.com
+priority: 1
+crawl_list:
+  content_format: html
+  url: https://avd.aliyun.com/high-risk/list
+crawl_detail:
+  content_format: html
+  url: <url>
+list_selector: table tbody tr
+list_value_selectors:
+  url: 
+    selector: td:nth-child(1) a
+    value_attr: href
+  tag_num:
+    selector: td:nth-child(1) a
+    value_attr: text
+  title:
+    selector: td:nth-child(2)
+    value_attr: text
+  cve:
+    selector: td:nth-child(5) button:nth-child(1)
+    value_attr: title
+    map:
+      无CVE: ""
+  poc_status:
+    selector: td:nth-child(5) button:nth-child(2)
+    value_attr: title
+    map:
+      暂无可利用代码: ""
+      POC 已公开: "PoC"
+      EXP 已公开: "Exp"
+      漏洞利用攻击武器化: "Exp"
+  publish_time:
+    selector: td:nth-child(4)
+    value_attr: text
+detail_value_selectors:
+  level:
+    selector: .header__title span:nth-child(1)
+    value_attr: text
+    map:
+      低危: 1
+      中危: 2
+      高危: 3
+      严重: 4
+  descript:
+    selector: .text-detail:eq(0) div
+    value_attr: text
+    break_keyword:
+      - 影响版本
+      - 受影响版本
+      - 漏洞影响版本
+      - 影响范围
+      - 漏洞影响范围
+      - 安全版本
+  patch:
+    selector: div.metric-value:eq(2)
+    value_attr: text
+    map:
+      官方补丁: 1
+      暂无: 0
+      N/A: 0
+  reference_links:
+    selector: table:eq(0) tbody tr a
+    value_attr: href
+    check_selector: table:eq(0) thead th:eq(0) h6
+    check_value_attr: text
+    check_value: 参考链接
+  cwes:
+    selector: table:eq(2) tbody tr td:eq(0)
+    value_attr: text
+    check_selector: table:eq(2) thead tr td:eq(0)
+    check_value_attr: text
+    check_value: CWE-ID
+  components:
+    selector: table:eq(1) tbody tr:gt(1) td:eq(2) a
+    value_attr: text
+    check_selector: table:eq(1) thead tr td:eq(3)
+    check_value_attr: text
+    check_value: 产品
+  custom_score:
+    selector: .cvss-breakdown__score
+    value_attr: text

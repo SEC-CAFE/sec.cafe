@@ -1,0 +1,23 @@
+services:
+    crawler-scheduler:
+        image: sec_cafe_backend:1.0
+        container_name: crawler-scheduler
+        env_file:
+            - .env
+        network_mode: host
+        volumes:
+            - .:/app
+            - /etc/localtime:/etc/localtime
+        command: "celery -A crawler.scheduler.app worker -l info -Q task.task_creator,task.result_handler,task.clean_db --beat -n crawler-scheduler"
+        restart: always
+    crawler-worker:
+        image: sec_cafe_backend:1.0
+        container_name: crawler-worker
+        env_file:
+            - .env
+        network_mode: host
+        volumes:
+            - .:/app
+            - /etc/localtime:/etc/localtime
+        command: "celery -A crawler.scheduler.app worker -l info -Q task.vuli_monitor.crawler_list,task.vuli_monitor.crawler_detail --concurrency=10 -n crawler-worker"
+        restart: always

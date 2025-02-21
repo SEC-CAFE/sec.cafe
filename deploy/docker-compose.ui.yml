@@ -1,0 +1,22 @@
+services:
+  backend:
+    container_name: sec_cafe_backend
+    image: sec_cafe_backend:1.0
+    # environment:
+    #   - HTTP_PROXY=socks5://172.28.0.10:1080
+    #   - HTTPS_PROXY=socks5://172.28.0.10:1080
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+    volumes:
+      - ./backend:/app
+      - /etc/localtime:/etc/localtime
+    networks:
+      proxy_proxy:
+        ipv4_address: 172.28.6.6
+
+networks:
+  ui:
+    ipam:
+      config:
+      - subnet: 172.28.6.0/24
