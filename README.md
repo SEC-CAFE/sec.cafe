@@ -43,8 +43,8 @@
 采用容器化部署，也支持github workflows部署  
 
 ### 部署说明
-部署请参考[部署说明](https://github.com/SEC-CAFE/sec.cafe/blob/main/DEPLOY.md)] 
+部署请参考[部署说明](https://github.com/SEC-CAFE/sec.cafe/blob/main/DEPLOY.md)
 
 ### 新增情报源
-* 在`backend/crawler/worker/vuli_monitor/templates`目录下新增yml文件，yml文件配置方式请参考[爬取配置说明](https://github.com/SEC-CAFE/sec.cafe/blob/main/CRAWLER.md)]
+* 在`backend/crawler/worker/vuli_monitor/templates`目录下新增yml文件，yml文件配置方式请参考[爬取配置说明](https://github.com/SEC-CAFE/sec.cafe/blob/main/CRAWLER.md)
 * 更新Crawler代码并重启服务
