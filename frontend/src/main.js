@@ -134,13 +134,10 @@ app.provide('globalConfig', {
   showAdsBlock: parseBool(import.meta.env.VITE_APP_SHOW_AD_BLOCK, false),
   showYearlySponsors: parseBool(import.meta.env.VITE_APP_SHOW_YEARLY_SPONSORS, false),
   navExternalLinks: parseJsonConfig(import.meta.env.VITE_APP_NAV_EXTERNAL_LINKS, [
-    { name: '安全手册', url: import.meta.env.VITE_APP_HANDBOOK_URL || '/handbook', position: 'main' },
-    { name: '安全搜搜', url: import.meta.env.VITE_APP_SECSOSO_URL || 'https://secsoso.com?ref=https://sec.cafe', position: 'main', badge: 'beta' },
-    { name: 'API文档', url: import.meta.env.VITE_APP_API_DOCS_URL || 'https://api.sec.cafe/docs', position: 'help' }
+    { name: '安全手册', url: '/handbook', position: 'main' },
+    { name: '安全搜搜', url: 'https://secsoso.com?ref=https://sec.cafe', position: 'main', badge: 'beta' },
+    { name: 'API文档', url: 'https://api.sec.cafe/docs', position: 'help' }
   ]),
-  handbookUrl: import.meta.env.VITE_APP_HANDBOOK_URL || '/handbook',
-  secsosoUrl: import.meta.env.VITE_APP_SECSOSO_URL || 'https://secsoso.com?ref=https://sec.cafe',
-  apiDocsUrl: import.meta.env.VITE_APP_API_DOCS_URL || 'https://api.sec.cafe/docs',
   contactEmail: import.meta.env.VITE_APP_CONTACT_EMAIL || 'f00y1n9@gmail.com',
   contactWechat: import.meta.env.VITE_APP_CONTACT_WECHAT || 'fooying',
   contactGroupHint: import.meta.env.VITE_APP_CONTACT_GROUP_HINT || '微信群请添加微信[_ffff01]为好友邀请进群！',
