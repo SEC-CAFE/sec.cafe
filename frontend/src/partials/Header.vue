@@ -29,11 +29,11 @@
               <span class="text-xs absolute mr-2.5 mb-2.5">beta</span>
             </a>
             -->
-            <a class="block py-1 text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="/handbook">
+            <a class="block py-1 text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" :href="globalConfig.handbookUrl" :target="linkTarget(globalConfig.handbookUrl)">
               安全手册            </a>
           </li>
           <li class="px-3">
-            <a class="block py-1  mr-4 text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" target="_blank" href="https://secsoso.com">
+            <a class="block py-1  mr-4 text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" :target="linkTarget(globalConfig.secsosoUrl)" :href="globalConfig.secsosoUrl">
               安全搜搜
               <span class="text-xs absolute mr-2.5 mb-2.5">beta</span>
             </a>
@@ -52,17 +52,14 @@
                 </router-link>
               </li>
               <li>
-                <a class="font-medium text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100 flex py-2 px-5 leading-tight cursor-pointer" href="https://api.sec.cafe/docs" target="_blank">API文档</a>
-              </li>
-              <li>
-                <a class="font-medium text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100 flex py-2 px-5 leading-tight cursor-pointer" href="https://discord.gg/WXSvykbYDb" target="_blank">Discord社区</a>
+                <a class="font-medium text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100 flex py-2 px-5 leading-tight cursor-pointer" :href="globalConfig.apiDocsUrl" :target="linkTarget(globalConfig.apiDocsUrl)">API文档</a>
               </li>
               <li>
                 <router-link class="" to="/about" v-slot="{ href, navigate, isExactActive }" >
                   <a class="font-medium text-sm  flex py-2 px-5 leading-tight cursor-pointer" :class="isExactActive ? 'text-sky-500 after:bg-sky-500' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100'" :href="href" @click="navigate">关于</a>
                 </router-link>
               </li>
-              <li>
+              <li v-if="globalConfig.showSponsorPage">
                 <router-link class="" to="/sponsor" v-slot="{ href, navigate, isExactActive }" >
                   <a class="font-medium text-sm  flex py-2 px-5 leading-tight cursor-pointer" :class="isExactActive ? 'text-sky-500 after:bg-sky-500' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100'" :href="href" @click="navigate">打赏赞助</a>
                 </router-link>
@@ -157,26 +154,23 @@
                 </router-link>
               </li>
               <li>
-                <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="/handbook">安全手册</a>
+                <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" :href="globalConfig.handbookUrl" :target="linkTarget(globalConfig.handbookUrl)">安全手册</a>
               </li>
               <li>
-                <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="https://secsoso.com?ref=https://sec.cafe" target="_blank">安全搜搜</a>
+                <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" :href="globalConfig.secsosoUrl" :target="linkTarget(globalConfig.secsosoUrl)">安全搜搜</a>
               </li>
               <li>
                 <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="/links" target="_blank">安全导航</a>
               </li>
               <li>
-                <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="https://api.sec.cafe/docs" target="_blank">API文档</a>
-              </li>
-              <li>
-                <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="https://discord.gg/KNFWaRfk" target="_blank">Discord社区</a>
+                <a class="block py-1 font-medium text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" :href="globalConfig.apiDocsUrl" :target="linkTarget(globalConfig.apiDocsUrl)">API文档</a>
               </li>
               <li>
                 <router-link class="" to="/about"   v-slot="{ href, navigate, isExactActive }" >
                   <a class="block py-1 font-medium" :class="isExactActive ? 'text-sky-500 after:bg-sky-500' : 'text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300'" :href="href" @click="navigate">关于</a>
                 </router-link>
               </li>
-              <li>
+              <li v-if="globalConfig.showSponsorPage">
                 <router-link class="" to="/sponsor"   v-slot="{ href, navigate, isExactActive }" >
                   <a class="block py-1 font-medium" :class="isExactActive ? 'text-sky-500 after:bg-sky-500' : 'text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300'" :href="href" @click="navigate">打赏赞助</a>
                 </router-link>
@@ -274,6 +268,10 @@ export default {
 
     const globalConfig = inject('globalConfig');
     const siteTitle = globalConfig.siteTitle;
+    const linkTarget = (url) => {
+      if (!url) return ''
+      return url.startsWith('http') ? '_blank' : ''
+    }
 
     watch(darkMode, () => {
       localStorage.setItem('dark-mode', darkMode.value)
@@ -292,7 +290,9 @@ export default {
       currentRoute,
       mobileNav,
       hamburger,
-      siteTitle
+      siteTitle,
+      globalConfig,
+      linkTarget
     }
   },
 }

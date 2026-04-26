@@ -13,7 +13,7 @@
         <!-- Copyright -->
 
         <div class="text-xs text-slate-400 dark:text-slate-500 md:inline-flex">
-          <div class="md:text-xs text-sm text-slate-800 dark:text-slate-400">Copyright &copy; {{ globalConfig.siteTitle }}.</div>
+          <div class="md:text-xs text-sm text-slate-800 dark:text-slate-400">{{ globalConfig.copyrightText }}</div>
           <a v-if=globalConfig.gaNum class="pl-1 flex items-center justify-center" :href="`https://beian.mps.gov.cn/#/query/webSearch?code=` + globalConfig.gaCode" rel="noreferrer" target="_blank">
             <img class="w-3 h-3" src="../images/logo.gabei.png">
             &nbsp;{{ globalConfig.gaNum }}

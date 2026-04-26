@@ -21,6 +21,11 @@ const parseJsonConfig = (value, fallback) => {
   }
 }
 
+const parseBool = (value, fallback = false) => {
+  if (value === undefined || value === null || value === '') return fallback
+  return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase())
+}
+
 const optionalScripts = {
   ads: null,
   umami: null
@@ -107,7 +112,18 @@ app.provide('globalConfig', {
   umamiScriptUrl: import.meta.env.VITE_APP_UMAMI_SCRIPT_URL || '',
   umamiWebsiteId: import.meta.env.VITE_APP_UMAMI_WEBSITE_ID || '',
   footerSlogan: import.meta.env.VITE_APP_FOOTER_SLOGAN || '',
+  copyrightText: import.meta.env.VITE_APP_COPYRIGHT_TEXT || 'Copyright © SEC.CAFE.',
   spiderUa: import.meta.env.VITE_APP_SPIDER_UA || 'sec_cafe(https://sec.cafe/spider)',
+  showSponsorPage: parseBool(import.meta.env.VITE_APP_SHOW_SPONSOR_PAGE, false),
+  showBookRecommend: parseBool(import.meta.env.VITE_APP_SHOW_BOOK_RECOMMEND, false),
+  showAdsBlock: parseBool(import.meta.env.VITE_APP_SHOW_AD_BLOCK, false),
+  showYearlySponsors: parseBool(import.meta.env.VITE_APP_SHOW_YEARLY_SPONSORS, false),
+  handbookUrl: import.meta.env.VITE_APP_HANDBOOK_URL || '/handbook',
+  secsosoUrl: import.meta.env.VITE_APP_SECSOSO_URL || 'https://secsoso.com?ref=https://sec.cafe',
+  apiDocsUrl: import.meta.env.VITE_APP_API_DOCS_URL || 'https://api.sec.cafe/docs',
+  contactEmail: import.meta.env.VITE_APP_CONTACT_EMAIL || 'f00y1n9@gmail.com',
+  contactWechat: import.meta.env.VITE_APP_CONTACT_WECHAT || 'fooying',
+  contactGroupHint: import.meta.env.VITE_APP_CONTACT_GROUP_HINT || '微信群请添加微信[_ffff01]为好友邀请进群！',
   friendLinks: parseJsonConfig(import.meta.env.VITE_APP_FRIEND_LINKS, [
     { name: 'SEC.CAFE 安全咖啡', url: 'https://sec.cafe?ref=github_opensource' },
     { name: 'SECSOSO 安全搜搜', url: 'https://secsoso.com?ref=https://sec.cafe' },
