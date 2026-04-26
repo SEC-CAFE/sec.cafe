@@ -26,8 +26,11 @@ const parseBool = (value, fallback = false) => {
 
 const optionalScripts = {
   ads: null,
-  umami: null
+  umami: null,
+  baiduHm: null
 }
+
+const UMAMI_SCRIPT_URL = 'https://analytics.umami.is/script.js'
 
 const ensureGoogleAdsScript = (client) => {
   if (!client || optionalScripts.ads) return
@@ -39,14 +42,24 @@ const ensureGoogleAdsScript = (client) => {
   optionalScripts.ads = script
 }
 
-const ensureUmamiScript = (scriptUrl, websiteId) => {
-  if (!scriptUrl || !websiteId || optionalScripts.umami) return
+const ensureUmamiScript = (websiteId) => {
+  if (!websiteId || optionalScripts.umami) return
   const script = document.createElement('script')
   script.async = true
-  script.src = scriptUrl
+  script.src = UMAMI_SCRIPT_URL
   script.setAttribute('data-website-id', websiteId)
   document.body.appendChild(script)
   optionalScripts.umami = script
+}
+
+const ensureBaiduHmScript = (hmId) => {
+  if (!hmId || optionalScripts.baiduHm) return
+  window._hmt = window._hmt || []
+  const script = document.createElement('script')
+  script.async = true
+  script.src = `https://hm.baidu.com/hm.js?${hmId}`
+  document.body.appendChild(script)
+  optionalScripts.baiduHm = script
 }
 
 try {
@@ -105,17 +118,26 @@ app.provide('globalConfig', {
   icpNum: import.meta.env.VITE_APP_ICP_NUM,
   gaNum: import.meta.env.VITE_APP_GA_NUM,
   gaCode: import.meta.env.VITE_APP_GA_CODE,
+  baiduHmId: import.meta.env.VITE_APP_BAIDU_HM_ID || '',
   googleAdsClient: import.meta.env.VITE_APP_GOOGLE_ADS_CLIENT || '',
   googleAdsSlot: import.meta.env.VITE_APP_GOOGLE_ADS_SLOT || '',
-  umamiScriptUrl: import.meta.env.VITE_APP_UMAMI_SCRIPT_URL || '',
   umamiWebsiteId: import.meta.env.VITE_APP_UMAMI_WEBSITE_ID || '',
   footerSlogan: import.meta.env.VITE_APP_FOOTER_SLOGAN || '',
+  footerProjectShow: parseBool(import.meta.env.VITE_APP_FOOTER_PROJECT_SHOW, true),
+  footerProjectText: import.meta.env.VITE_APP_FOOTER_PROJECT_TEXT || "A Fooying's Project",
+  footerProjectUrl: import.meta.env.VITE_APP_FOOTER_PROJECT_URL || 'https://www.fooying.com',
+  footerProjectLogo: import.meta.env.VITE_APP_FOOTER_PROJECT_LOGO || 'fooying-logo.png',
   copyrightText: import.meta.env.VITE_APP_COPYRIGHT_TEXT || 'Copyright © SEC.CAFE.',
   spiderUa: import.meta.env.VITE_APP_SPIDER_UA || 'sec_cafe(https://sec.cafe/spider)',
   showSponsorPage: parseBool(import.meta.env.VITE_APP_SHOW_SPONSOR_PAGE, false),
   showBookRecommend: parseBool(import.meta.env.VITE_APP_SHOW_BOOK_RECOMMEND, false),
   showAdsBlock: parseBool(import.meta.env.VITE_APP_SHOW_AD_BLOCK, false),
   showYearlySponsors: parseBool(import.meta.env.VITE_APP_SHOW_YEARLY_SPONSORS, false),
+  navExternalLinks: parseJsonConfig(import.meta.env.VITE_APP_NAV_EXTERNAL_LINKS, [
+    { name: '安全手册', url: import.meta.env.VITE_APP_HANDBOOK_URL || '/handbook', position: 'main' },
+    { name: '安全搜搜', url: import.meta.env.VITE_APP_SECSOSO_URL || 'https://secsoso.com?ref=https://sec.cafe', position: 'main', badge: 'beta' },
+    { name: 'API文档', url: import.meta.env.VITE_APP_API_DOCS_URL || 'https://api.sec.cafe/docs', position: 'help' }
+  ]),
   handbookUrl: import.meta.env.VITE_APP_HANDBOOK_URL || '/handbook',
   secsosoUrl: import.meta.env.VITE_APP_SECSOSO_URL || 'https://secsoso.com?ref=https://sec.cafe',
   apiDocsUrl: import.meta.env.VITE_APP_API_DOCS_URL || 'https://api.sec.cafe/docs',
@@ -130,7 +152,8 @@ app.provide('globalConfig', {
 });
 
 ensureGoogleAdsScript(import.meta.env.VITE_APP_GOOGLE_ADS_CLIENT)
-ensureUmamiScript(import.meta.env.VITE_APP_UMAMI_SCRIPT_URL, import.meta.env.VITE_APP_UMAMI_WEBSITE_ID)
+ensureUmamiScript(import.meta.env.VITE_APP_UMAMI_WEBSITE_ID)
+ensureBaiduHmScript(import.meta.env.VITE_APP_BAIDU_HM_ID)
 
 app.use(router)
 app.use(store);

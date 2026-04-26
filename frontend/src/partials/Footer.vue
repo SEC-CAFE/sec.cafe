@@ -5,7 +5,13 @@
         <div class="mb-4 order-2 md:ml-4 md:mb-0 space-x-2 text-xs text-slate-500 dark:text-slate-400">
           <div v-if="globalConfig.footerSlogan">{{ globalConfig.footerSlogan }}</div>
           <h2 class="inline-flex md:float-right">
-            <a class="pt-0.4 pl-1" href="https://sec.cafe">Powered By SEC.CAFE</a>
+            <template v-if="globalConfig.footerProjectShow">
+              <img v-if="footerProjectLogoUrl" class="w-5" :src="footerProjectLogoUrl" alt="footer-project-logo">
+              <a class="pt-0.4 pl-1" :href="globalConfig.footerProjectUrl" target="_blank" rel="noreferrer">
+                {{ globalConfig.footerProjectText }}
+              </a>
+            </template>
+            <a v-else class="pt-0.4 pl-1" href="https://sec.cafe">Powered By SEC.CAFE</a>
           </h2>
         </div>
 
@@ -27,14 +33,29 @@
 </template>
 
 <script>
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 
 export default {
   name: 'Footer',
   setup() {
     const globalConfig = inject('globalConfig');
+
+    const footerProjectLogoUrl = computed(() => {
+      const logo = globalConfig?.footerProjectLogo;
+      if (!logo) return '';
+      if (logo.startsWith('http://') || logo.startsWith('https://') || logo.startsWith('/')) {
+        return logo;
+      }
+      try {
+        return new URL(`../images/${logo}`, import.meta.url).href;
+      } catch (e) {
+        return '';
+      }
+    });
+
     return {
-      globalConfig
+      globalConfig,
+      footerProjectLogoUrl
     }
   },
 }
