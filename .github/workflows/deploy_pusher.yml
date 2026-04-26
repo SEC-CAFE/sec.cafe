@@ -18,33 +18,33 @@ jobs:
         uses: garygrossgarten/github-action-ssh@release
         with:
           command: cd /tmp;mkdir -p deploy
-          host: ${{ secrets.DEPLOY_HOST}}
-          port: ${{ secrets.DEPLOY_HOST_PORT}}
-          username: ${{ secrets.DEPLOY_HOST_USER}}
+          host: ${{ secrets.CRAWLER_DEPLOY_HOST}}
+          port: ${{ secrets.CRAWLER_DEPLOY_PORT}}
+          username: ${{ secrets.CRAWLER_DEPLOY_USER}}
           privateKey: ${{ secrets.DEPLOY_PRIVATE_KEY}}
       - name: upload code
         uses: appleboy/scp-action@v0.1.7
         with:
           source: upload/*.*
           target: /tmp/deploy/
-          host: ${{ secrets.DEPLOY_HOST}}
-          port: ${{ secrets.DEPLOY_HOST_PORT }}
-          username: ${{ secrets.DEPLOY_HOST_USER}}
+          host: ${{ secrets.CRAWLER_DEPLOY_HOST}}
+          port: ${{ secrets.CRAWLER_DEPLOY_PORT }}
+          username: ${{ secrets.CRAWLER_DEPLOY_USER}}
           key: ${{ secrets.DEPLOY_PRIVATE_KEY}}
       - name: deploy pusher
         uses: garygrossgarten/github-action-ssh@release
         with:
-          command: cd /tmp/deploy/;mv upload/* .;tar zxvf backend.tar.gz;tar zxvf deploy.tar.gz;cd deploy;chmod +x deploy.sh;sh deploy.sh -s pusher -t /data/pusher -e prod --clean;redis-cli -h 172.17.0.2 -p 6356 -n 1 -a 'kY.EfH1~' del sec_cafe_vuli_push_status
-          host: ${{ secrets.DEPLOY_HOST}}
-          port: ${{ secrets.DEPLOY_HOST_PORT}}
-          username: ${{ secrets.DEPLOY_HOST_USER}}
+          command: cd /tmp/deploy/;mv upload/* .;tar zxvf backend.tar.gz;tar zxvf deploy.tar.gz;cd deploy;chmod +x deploy.sh;sh deploy.sh -s pusher -t /data/pusher -e prod --clean
+          host: ${{ secrets.CRAWLER_DEPLOY_HOST}}
+          port: ${{ secrets.CRAWLER_DEPLOY_PORT}}
+          username: ${{ secrets.CRAWLER_DEPLOY_USER}}
           privateKey: ${{ secrets.DEPLOY_PRIVATE_KEY}}
       - name: delete code
         uses: garygrossgarten/github-action-ssh@release
         with:
           command: rm -rf /tmp/deploy
-          host: ${{ secrets.DEPLOY_HOST}}
-          port: ${{ secrets.DEPLOY_HOST_PORT}}
-          username: ${{ secrets.DEPLOY_HOST_USER}}
+          host: ${{ secrets.CRAWLER_DEPLOY_HOST}}
+          port: ${{ secrets.CRAWLER_DEPLOY_PORT}}
+          username: ${{ secrets.CRAWLER_DEPLOY_USER}}
           privateKey: ${{ secrets.DEPLOY_PRIVATE_KEY}}
       

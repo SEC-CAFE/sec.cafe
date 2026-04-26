@@ -3,8 +3,9 @@
     <div class="py-8 max-w-7xl mx-auto">
       <div class="text-center md:flex md:items-center md:justify-between">
         <div class="mb-4 order-2 md:ml-4 md:mb-0 space-x-2 text-xs text-slate-500 dark:text-slate-400">
+          <div v-if="globalConfig.footerSlogan">{{ globalConfig.footerSlogan }}</div>
           <h2 class="inline-flex md:float-right">
-            <a class="pt-0.4 pl-1" href="https://sec.cafe">Powered By SEC.CAFE</a>
+            <a class="pt-0.4 pl-1" :href="globalConfig.footerProjectUrl">{{ globalConfig.footerProjectName }}</a>
           </h2>
         </div>
 

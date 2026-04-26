@@ -2,9 +2,11 @@ name: 阿里云漏洞库(AVD)
 homepage: https://avd.aliyun.com
 priority: 1
 crawl_list:
+  browser_req: false
   content_format: html
   url: https://avd.aliyun.com/high-risk/list
 crawl_detail:
+  browser_req: false
   content_format: html
   url: <url>
 list_selector: table tbody tr

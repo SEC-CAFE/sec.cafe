@@ -36,13 +36,22 @@ API部署同理backend部署
 * 进入`deploy`目录，执行`chmod +x deploy.sh;sh deploy.sh -s 项目名 -t 目标目录 -e prod --clean` 完成服务启动
 * crawler的项目名为`crawler`;pusher项目名为`pusher`
 
+#### browser与代理（可选）
+如果需要为爬虫启用远程浏览器与代理，可使用以下部署文件：
+* `deploy/docker-compose.browser.yml`
+* `deploy/docker-compose.proxy.yml`
+* `deploy/v2_config.example.json`（复制为本地 `deploy/v2_config.json` 并填入真实配置）
+
 
 ### 如何使用github workflows部署
-* 在对应github项目Settings-Secrets and Variables-Actions 添加以下Secrets，如果部署在不同服务器，可配置多个key并修改修改`.github/workflows`中yml文件
-  * DEPLOY_HOST
-  * DEPLOY_HOST_PORT
+* 在对应github项目 Settings -> Secrets and Variables -> Actions 添加以下 Secrets（可按 UI/API 与 crawler/pusher 分开）：
+  * UI_DEPLOY_HOST
+  * UI_DEPLOY_PORT
+  * UI_DEPLOY_USER
+  * CRAWLER_DEPLOY_HOST
+  * CRAWLER_DEPLOY_PORT
+  * CRAWLER_DEPLOY_USER
   * DEPLOY_PRIVATE_KEY
-  * DEPLOY_HOST_USER
 * 项目Actions即可手动触发进行部署(如果部署在同一天服务，请等待其他任务执行完成再进行下一个任务)
 
 

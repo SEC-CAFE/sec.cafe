@@ -42,8 +42,8 @@ while true ; do
 done
 
 
-if [[ '$TARGET_DIR' == *'/' ]] ; then
-    TARGET_DIR=${TARGET_DIR:0:0-1}
+if [[ "$TARGET_DIR" == */ ]] ; then
+    TARGET_DIR=${TARGET_DIR%/}
 fi
 
 if [ "$ENV" == "prod" ] ; then
@@ -128,7 +128,14 @@ ui_deploy(){
         cp -r ../backend/.envs/$item $TARGET_DIR/backend/.envs/
     done
 
-    cp -r ../dist/* $TARGET_DIR/html/
+    if [ -d ../dist ]; then
+        cp -r ../dist/* $TARGET_DIR/html/
+    elif [ -d ../frontend ]; then
+        cp -r ../frontend/* $TARGET_DIR/html/
+    else
+        echo "No frontend assets found: expected ../dist or ../frontend"
+        exit 1
+    fi
     cp -r nginx/ui_nginx.conf $TARGET_DIR/nginx/nginx.conf
 
     if [ "$ENV" == "prod" ] ; then
@@ -161,7 +168,7 @@ api_deploy(){
     cp -r ../backend/src $TARGET_DIR/src/
     cp -r ../backend/run_api.py $TARGET_DIR/src/
     for item in $ENV_FILE; do
-        cp -r ../backend/.envs/$item $TARGET_DIR/backend/.envs/
+        cp -r ../backend/.envs/$item $TARGET_DIR/src/.envs/
     done
     cp -r nginx/api_nginx.conf $TARGET_DIR/nginx/nginx.conf
     if [ "$ENV" == "prod" ] ; then

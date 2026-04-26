@@ -2,10 +2,12 @@ name: 奇安信威胁情报中心
 homepage: https://ti.qianxin.com/
 priority: 3
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://ti.qianxin.com/alpha-api/v2/vuln/one-day
   method: post
 crawl_detail:
+  browser_req: false
   content_format: json
   url: https://nox.qianxin.com/api/web/portal/vuln_repo/show
   headers:

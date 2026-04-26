@@ -2,6 +2,7 @@ name: 用友安全中心
 homepage: https://security.yonyou.com/#/noticeList
 priority: 1
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://security.yonyou.com/src/front/notice/page
   headers:
@@ -10,6 +11,7 @@ crawl_list:
   params: '{"currentPage":1,"limit":10,"productLine":"","notice":"","isFlag":""}'
   method: post
 crawl_detail:
+  browser_req: false
   content_format: json
   url: https://security.yonyou.com/#/noticeInfo?id=<tag_num>
   headers:

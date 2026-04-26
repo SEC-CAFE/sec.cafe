@@ -1,0 +1,18 @@
+services:
+    v2-client:
+        container_name: v2-client
+        image: v2fly/v2fly-core
+        volumes:
+            - ./v2_config.json:/etc/v2ray/config.json
+            - ./logs:/var/logs
+            - /etc/localtime:/etc/localtime
+        command: run -config=/etc/v2ray/config.json
+        networks:
+            proxy:
+                ipv4_address: 172.28.0.10
+
+networks:
+  proxy:
+    ipam:
+      config:
+      - subnet: 172.28.0.0/24

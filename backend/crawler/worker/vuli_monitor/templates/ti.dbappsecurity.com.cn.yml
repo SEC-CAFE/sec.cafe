@@ -2,10 +2,12 @@ name: 安恒星图平台
 homepage: https://ti.dbappsecurity.com.cn/vul
 priority: 4
 crawl_list:
+  browser_req: false
   content_format: json
   if_nuxt: true
   url: https://ti.dbappsecurity.com.cn/vul
 crawl_detail:
+  browser_req: false
   content_format: html
   url: <url>
 list_selector: data

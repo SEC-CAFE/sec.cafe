@@ -12,3 +12,4 @@ node_modules
 deploy/data
 deploy/log
 celerybeat-schedule.db
+deploy/v2_config.json

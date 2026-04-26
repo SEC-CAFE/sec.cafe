@@ -1,0 +1,21 @@
+services:
+    chrome:
+        image: browserless/chrome
+        env_file:
+            - .env
+        ports:
+          - "${BROWSER_PORTS}:3000"
+        environment:
+          MAX_CONCURRENT_SESSIONS: 20  # 并发会话，不建议设置太大，建议启动多个docker
+          HOST: 0.0.0.0  # 绑定HOST
+          TOKEN: ${BROWSER_TOKEN}  # 远程调用Token
+          DEFAULT_BLOCK_ADS: true  # 默认屏蔽广告
+          DEFAULT_HEADLESS: false  # 不启动无头模式，容易被检测
+          DEFAULT_IGNORE_HTTPS_ERRORS: true  # 默认忽略HTTPS错误
+          PREBOOT_CHROME: true
+          KEEP_ALIVE: true
+          CHROME_REFRESH_TIME: 86400000
+          CONNECTION_TIMEOUT: -1
+        restart: always
+
+# docker-compose -f docker-compose.browser.yml up -d --scale chrome=5 启动多个，端口从8301到8320

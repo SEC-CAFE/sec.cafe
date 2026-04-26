@@ -2,11 +2,13 @@ name: Seebug 漏洞平台
 homepage: https://www.seebug.org
 priority: 4
 crawl_list:
+  browser_req: false
   content_format: html
   url: https://www.seebug.org/vuldb/vulnerabilities?order_time=0&order_rank=1&level=high&submitTime=month
   headers:
     cookies: '__jsl_clearance_s=1705050066.994|-1|iCZr0RnU1%2FcM%2Fr5VjRAo1kyeFyY%3D; Max-age=3600; Path=/; SameSite=None; Secure'
 crawl_detail:
+  browser_req: false
   content_format: html
   url: <url>
 list_selector: table tbody tr

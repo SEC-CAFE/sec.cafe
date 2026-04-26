@@ -2,9 +2,11 @@ name: 腾讯云安全公告
 homepage: https://cloud.tencent.com/announce/?categorys=21
 priority: 4
 crawl_list:
+  browser_req: false
   content_format: html
   url: https://cloud.tencent.com/announce/?categorys=21
 crawl_detail:
+  browser_req: false
   content_format: html
   url: <url>
 list_selector: .msg-list-bd .msg-list-item

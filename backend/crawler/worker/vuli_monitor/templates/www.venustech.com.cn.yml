@@ -2,11 +2,13 @@ name: 启明星辰安全通告
 homepage: https://www.venustech.com.cn/new_type/aqtg/
 priority: 4
 crawl_list:
+  browser_req: false
   content_format: html
   url: https://www.venustech.com.cn/new_type/aqtg/
   filter:
     title: re_[^微软]*[^多个安全漏洞]
 crawl_detail:
+  browser_req: false
   content_format: html
   url: <url>
 list_selector: .safetyList .safetyItem

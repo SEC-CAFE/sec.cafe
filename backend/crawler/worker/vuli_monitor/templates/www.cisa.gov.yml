@@ -6,9 +6,11 @@ interval_hours: 24
 sort: -dateAdded
 list_limit: 10
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 crawl_detail:
+  browser_req: false
   content_format: json
   url: <url>
 list_selector: vulnerabilities

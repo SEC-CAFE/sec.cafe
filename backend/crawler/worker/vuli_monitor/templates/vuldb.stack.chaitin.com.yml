@@ -2,9 +2,11 @@ name: 长亭漏洞库
 homepage: https://stack.chaitin.com/vuldb/index
 priority: 2
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://stack.chaitin.com/api/v2/vuln/list/?limit=15&offset=0&search=
 crawl_detail:
+  browser_req: false
   content_format: json
   url: <url>
 list_selector: data/list

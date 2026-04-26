@@ -29,7 +29,7 @@
               <span class="text-xs absolute mr-2.5 mb-2.5">beta</span>
             </a>
             -->
-            <a class="block py-1 text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="https://sec.cafe/handbook">
+            <a class="block py-1 text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300" href="/handbook">
               安全手册            </a>
           </li>
           <li class="px-3">

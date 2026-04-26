@@ -2,12 +2,14 @@ name: 绿盟威胁情报中心
 homepage: https://nti.nsfocus.com/threatNotice
 priority: 3
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://nti.nsfocus.com/api/v2/report/notie/?page=1&size=10&order=reported
   method: get
   filter:
     title: re_[^微软]*漏洞.*通告
 crawl_detail:
+  browser_req: false
   content_format: json
   url: <url>
   method: get

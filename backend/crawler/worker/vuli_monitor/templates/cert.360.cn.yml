@@ -2,11 +2,13 @@ name: 360网络安全响应中心
 homepage: https://cert.360.cn/warning
 priority: 4
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://cert.360.cn/warning/searchbypage?length=6&start=0
   filter:
     title: 漏洞通告
 crawl_detail:
+  browser_req: false
   content_format: html
   url: <url>
 list_selector: data

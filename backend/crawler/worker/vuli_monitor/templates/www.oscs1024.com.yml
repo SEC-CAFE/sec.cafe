@@ -2,6 +2,7 @@ name: OSCS开源安全情报
 homepage: https://www.oscs1024.com/cm
 priority: 3
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://www.oscs1024.com/oscs/v1/intelligence/list
   params: '{"page":1,"per_page":10}'
@@ -10,6 +11,7 @@ crawl_list:
     level: =3,4
     v_id: =1
 crawl_detail:
+  browser_req: false
   content_format: json
   url: https://www.oscs1024.com/oscs/v1/vdb/info
   params: '{"vuln_no":"<tag_num>"}'

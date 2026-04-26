@@ -12,13 +12,8 @@ services:
             - ./pgsql.conf:/etc/postgresql/postgresql.conf
             - ./log/pgsql:/var/log/postgresql
             - /etc/localtime:/etc/localtime
-
         command: "postgres -c config_file=/etc/postgresql/postgresql.conf"
-        networks:
-            db:
-                ipv4_address: 172.28.8.8
         restart: always
-        
 
     rabbitmq:
         container_name: rabbitmq
@@ -33,10 +28,8 @@ services:
             - ./data/rabbitmq:/var/lib/rabbitmq
             - ./log/rabbitmq:/var/log/rabbitmq
             - /etc/localtime:/etc/localtime
-        networks:
-            db:
-                ipv4_address: 172.28.8.9
         restart: always
+
     redis:
         container_name: redis
         hostname: redis
@@ -50,14 +43,12 @@ services:
             - ./data/redis:/data
             - ./log/redis:/var/log/redis
             - /etc/localtime:/etc/localtime
-        networks:
-            db:
-                ipv4_address: 172.28.8.10
         restart: always
+
     pgbackups:
         image: prodrigestivill/postgres-backup-local
         restart: always
-        user: postgres:postgres # Optional: see below
+        user: postgres:postgres
         volumes:
             - /data/bak/pgbackups:/backups
         links:
@@ -67,7 +58,7 @@ services:
         env_file:
             - .env
         environment:
-            - POSTGRES_HOST=172.28.8.10
+            - POSTGRES_HOST=pgsql
             - POSTGRES_DB=${POSTGRES_DB}
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -78,12 +69,3 @@ services:
             - BACKUP_KEEP_WEEKS=4
             - BACKUP_KEEP_MONTHS=6
             - HEALTHCHECK_PORT=9090
-        networks:
-            db:
-                ipv4_address: 172.28.8.11
-
-networks:
-  db:
-    ipam:
-      config:
-      - subnet: 172.28.8.0/24

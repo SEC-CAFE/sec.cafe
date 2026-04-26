@@ -2,6 +2,7 @@ name: 深信服漏洞情报
 homepage: https://sec.sangfor.com.cn/security-vulnerability
 priority: 4
 crawl_list:
+  browser_req: false
   content_format: json
   url: https://sec.sangfor.com.cn/api/v1/vuln/list?page_index=1&page_size=15&sort_order=-1&sort_field=discover_date&external_tags=623d7840032c8a8d5198764c%2C62ea79b599499ba1ab896374%2C62e771fc99499ba1abd6dcac%2C64a2417010f68f0059f4a80a%2C64a2407510f68f00579bb6c0%2C623d7b9c032c8a8d51990164%2C623d7900032c8a8d51988c31
   headers:
@@ -16,6 +17,7 @@ crawl_list:
     level: =4
 
 crawl_detail:
+  browser_req: false
   content_format: json
   url: https://sec.sangfor.com.cn/api/v1/vuln/info?vuln_sfv=<tag_num>
   headers:

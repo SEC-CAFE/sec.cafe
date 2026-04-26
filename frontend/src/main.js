@@ -12,6 +12,40 @@ import './css/style.css'
 const pinia = createPinia()
 const app = createApp(App)
 
+const parseJsonConfig = (value, fallback) => {
+  if (!value) return fallback
+  try {
+    return JSON.parse(value)
+  } catch (e) {
+    return fallback
+  }
+}
+
+const optionalScripts = {
+  ads: null,
+  umami: null
+}
+
+const ensureGoogleAdsScript = (client) => {
+  if (!client || optionalScripts.ads) return
+  const script = document.createElement('script')
+  script.async = true
+  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`
+  script.crossOrigin = 'anonymous'
+  document.head.appendChild(script)
+  optionalScripts.ads = script
+}
+
+const ensureUmamiScript = (scriptUrl, websiteId) => {
+  if (!scriptUrl || !websiteId || optionalScripts.umami) return
+  const script = document.createElement('script')
+  script.async = true
+  script.src = scriptUrl
+  script.setAttribute('data-website-id', websiteId)
+  document.body.appendChild(script)
+  optionalScripts.umami = script
+}
+
 try {
   let user = JSON.parse(localStorage.getItem('sec_cafe_user'));
   let token_obj = user.access_token;
@@ -24,6 +58,12 @@ try {
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_APP_BASE_API;
 
+window.addGoogleAds = function () {
+  const nodes = document.getElementsByClassName('addGoogleItem')
+  for (let index = 0; index < nodes.length; index++) {
+    (window.adsbygoogle = window.adsbygoogle || []).push({})
+  }
+}
 
 
 axios.interceptors.response.use(
@@ -60,8 +100,23 @@ app.provide('globalConfig', {
   siteKeywords: import.meta.env.VITE_APP_KEYWORDS,
   icpNum: import.meta.env.VITE_APP_ICP_NUM,
   gaNum: import.meta.env.VITE_APP_GA_NUM,
-  gaCode: import.meta.env.VITE_APP_GA_CODE
+  gaCode: import.meta.env.VITE_APP_GA_CODE,
+  googleAdsClient: import.meta.env.VITE_APP_GOOGLE_ADS_CLIENT || '',
+  googleAdsSlot: import.meta.env.VITE_APP_GOOGLE_ADS_SLOT || '',
+  umamiScriptUrl: import.meta.env.VITE_APP_UMAMI_SCRIPT_URL || '',
+  umamiWebsiteId: import.meta.env.VITE_APP_UMAMI_WEBSITE_ID || '',
+  footerSlogan: import.meta.env.VITE_APP_FOOTER_SLOGAN || '',
+  footerProjectName: import.meta.env.VITE_APP_FOOTER_PROJECT_NAME || 'Powered By SEC.CAFE',
+  footerProjectUrl: import.meta.env.VITE_APP_FOOTER_PROJECT_URL || 'https://sec.cafe',
+  friendLinks: parseJsonConfig(import.meta.env.VITE_APP_FRIEND_LINKS, [
+    { name: 'SEC.CAFE 安全咖啡', url: 'https://sec.cafe?ref=github_opensource' },
+    { name: 'SECSOSO 安全搜搜', url: 'https://secsoso.com?ref=https://sec.cafe' },
+    { name: "Fooying's Blog", url: 'https://www.fooying.com?ref=https://sec.cafe' }
+  ])
 });
+
+ensureGoogleAdsScript(import.meta.env.VITE_APP_GOOGLE_ADS_CLIENT)
+ensureUmamiScript(import.meta.env.VITE_APP_UMAMI_SCRIPT_URL, import.meta.env.VITE_APP_UMAMI_WEBSITE_ID)
 
 app.use(pinia)
 app.use(router)

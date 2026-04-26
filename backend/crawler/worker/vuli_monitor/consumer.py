@@ -18,10 +18,6 @@ from src.utils.req import HttpReq
 from src.models import db_object
 from src.models.vul_intelligence import OVulIntelligence
 
-from src.conf.config import get_app_settings
-
-settings = get_app_settings()
-
 
 def _replace_value(field: str, data: dict):
     if not field:
@@ -50,7 +46,7 @@ async def req_html(template: dict, data: dict, url: str, _type: str):
     else:
         req_dict = template.get('crawl_list', {})
 
-    httpreq = HttpReq(settings.req_ua)
+    httpreq = HttpReq()
 
     # 预请求
     cookie = ''
@@ -75,6 +71,7 @@ async def req_html(template: dict, data: dict, url: str, _type: str):
 
     params = _replace_value(req_dict.get('params', None), data)
     method = req_dict.get('method', 'get')
+    method = 'browser_get' if req_dict.get('browser_req', False) else method
     html, resp = await httpreq.request(url, method, params, custom_headers=headers, retry_limit=3)
     return html, req_dict
 

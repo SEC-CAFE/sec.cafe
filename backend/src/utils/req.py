@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import time
 import random
 import aiohttp
 import asyncio
+from typing import Any, Dict, Optional
+
+from src.utils.browser_http_req2 import Browser
+from src.models import api_redis as task_redis, browser_urls
 
 
 SPIDER_USER_AGENT_LIST = [
@@ -91,13 +94,13 @@ USER_AGENT_LIST.extend(SPIDER_USER_AGENT_LIST)
 
 
 class HttpReq(object):
-    def __init__(self, ua=None):
+    def __init__(self, ua: str = ''):
         self.ua = ua
 
     def _get_connector(self):
         return aiohttp.TCPConnector(ttl_dns_cache=60, verify_ssl=False)
 
-    def _build_header(self, custom_headers={}):
+    def _build_header(self, custom_headers: Optional[Dict[str, Any]] = None):
         ua = self.ua if self.ua else random.choice(USER_AGENT_LIST)
         headers = {
             # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -107,10 +110,18 @@ class HttpReq(object):
             headers.update(custom_headers)
         return headers
 
-    async def request(self, url, method='get', params=None, custom_headers={}, retry_limit=0):
-        time.sleep(random.randint(1, 5))
-        content = None
+    async def request(
+        self,
+        url,
+        method='get',
+        params=None,
+        custom_headers: Optional[Dict[str, Any]] = None,
+        retry_limit=0,
+    ):
+        await asyncio.sleep(random.randint(1, 5))
         headers = self._build_header(custom_headers)
+        if method == 'browser_get':
+            return await self.browser_get(url, params=params, headers=headers, retry_limit=retry_limit)
         return await self.retry_request(url, method, params, headers, retry_limit)
 
     async def retry_request(self, url, method, params, headers, retry_limit=3, retry_times=0):
@@ -124,7 +135,7 @@ class HttpReq(object):
                 _request_method = self._get
 
             if retry_times > 0:  # 重试请求则延时
-                time.sleep(random.randint(1, 5))
+                await asyncio.sleep(random.randint(1, 5))
 
             need_retry = False
 
@@ -152,14 +163,30 @@ class HttpReq(object):
 
         return content, resp
 
-    async def _get(self, url, params=None, headers={}):
+    async def _get(self, url, params=None, headers=None):
+        headers = headers or {}
         async with aiohttp.ClientSession(connector=self._get_connector()) as session:
             async with session.get(url, params=params, headers=headers, ssl=False) as resp:
                 content = await resp.text(encoding='utf-8')
         return content, resp
 
-    async def _post(self, url, data=None, headers={}):
+    async def _post(self, url, data=None, headers=None):
+        headers = headers or {}
         async with aiohttp.ClientSession(connector=self._get_connector()) as session:
             async with session.post(url, data=data, headers=headers, ssl=False) as resp:
                 content = await resp.text(encoding='utf-8')
         return content, resp
+
+    async def browser_get(self, url, params=None, headers=None, retry_limit=0):
+        headers = headers or {}
+        # 浏览器节点未配置时自动降级，避免任务直接失败。
+        if not browser_urls:
+            return await self.retry_request(url, 'get', params, headers, retry_limit)
+
+        browser_req = Browser(browser_urls, task_redis.redis)
+        resp, data = await browser_req.get(url, headers=headers, params=params, timeout=120000)
+        try_times = 0
+        while (not data.get('content')) and try_times < retry_limit:
+            resp, data = await browser_req.get(url, headers=headers, params=params, timeout=120000)
+            try_times += 1
+        return data.get('content'), resp

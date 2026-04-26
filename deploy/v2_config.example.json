@@ -1,0 +1,66 @@
+{
+  "log": {
+    "access": "/var/logs/access.log",
+    "error": "/var/logs/error.log",
+    "loglevel": "warning"
+  },
+  "inbound": {
+    "port": 1080,
+    "listen": "0.0.0.0",
+    "tag": "socks-inbound",
+    "protocol": "socks",
+    "settings": {
+      "auth": "noauth",
+      "udp": false,
+      "ip": "0.0.0.0"
+    }
+  },
+  "outbound": {
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+        {
+          "address": "your-v2ray-host.example.com",
+          "port": 443,
+          "users": [
+            {
+              "id": "YOUR-UUID-HERE",
+              "alterId": 2
+            }
+          ]
+        }
+      ]
+    },
+    "streamSettings": {
+      "wsSettings": {
+        "path": "/api/v2",
+        "headers": {
+          "Host": "your-v2ray-host.example.com"
+        }
+      },
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+        "allowInsecure": false
+      }
+    },
+    "tag": "proxy"
+  },
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "domain": [
+          "github.com"
+        ],
+        "outboundTag": "proxy"
+      },
+      {
+        "type": "field",
+        "network": "tcp,udp",
+        "outboundTag": "direct"
+      }
+    ]
+  }
+}

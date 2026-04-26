@@ -12,4 +12,42 @@
       </a>
     </div>
   </div>
+
+  <div v-if="showGoogleAds" class="rounded-lg border border-slate-200 dark:border-slate-800 dark:bg-gradient-to-t dark:from-slate-800 dark:to-slate-800/30 p-5">
+    <div class="flex items-center space-x-3 mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px">
+        <path fill="#38BDF8" fill-rule="evenodd" d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.89l.813-2.846A.75.75 0 0 1 9 4.5Z" clip-rule="evenodd" />
+      </svg>
+      <span class="text-xs text-slate-400 dark:text-slate-500">AD</span>
+    </div>
+    <div class="text-center addGoogleItem">
+      <ins class="adsbygoogle"
+        style="display:inline-block;width:210px;height:400px"
+        :data-ad-client="globalConfig.googleAdsClient"
+        :data-ad-slot="globalConfig.googleAdsSlot"></ins>
+    </div>
+  </div>
 </template>
+
+<script>
+import { computed, inject, onMounted } from 'vue'
+
+export default {
+  name: 'WidgetAds',
+  setup() {
+    const globalConfig = inject('globalConfig')
+    const showGoogleAds = computed(() => !!(globalConfig.googleAdsClient && globalConfig.googleAdsSlot))
+
+    onMounted(() => {
+      if (showGoogleAds.value && typeof window.addGoogleAds === 'function') {
+        window.addGoogleAds()
+      }
+    })
+
+    return {
+      globalConfig,
+      showGoogleAds
+    }
+  }
+}
+</script>
