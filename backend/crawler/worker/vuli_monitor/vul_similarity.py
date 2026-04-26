@@ -12,6 +12,23 @@ settings = get_app_settings()
 DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
 
 
+def _parse_time(value):
+    if not value:
+        return value
+    if isinstance(value, datetime.datetime):
+        return value
+    if isinstance(value, datetime.date):
+        return datetime.datetime.combine(value, datetime.time.min)
+    if isinstance(value, str):
+        value = value.strip()
+        for fmt in ('%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d', '%Y/%m/%d %H:%M:%S'):
+            try:
+                return datetime.datetime.strptime(value, fmt)
+            except ValueError:
+                continue
+    return None
+
+
 def _get_vul_time(exists_vul: dict, new_vul: dict):
     exists_vul_publish_time = exists_vul.get('publish_time')
     exists_vul_update_time = exists_vul.get('update_time')
@@ -21,8 +38,7 @@ def _get_vul_time(exists_vul: dict, new_vul: dict):
     _times = (exists_vul_publish_time, exists_vul_update_time, new_vul_publish_time, new_vul_update_time)
     new_times = ()
     for _t in _times:
-        if _t and isinstance(_t, str):
-            _t = datetime.datetime.strptime(_t, '%Y-%m-%d')
+        _t = _parse_time(_t)
         new_times = new_times + (_t,)
 
     return new_times
@@ -132,8 +148,9 @@ def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
         result = result.rsplit('\n', 1)[1].strip()
     if result and "不同" in result:
         return False
-    else:
+    if result and "相同" in result:
         return True
+    return False
 
 
 def check_by_title_and_descript(exists_vul: dict, new_vul: dict):
@@ -163,6 +180,8 @@ def check_by_title_and_descript(exists_vul: dict, new_vul: dict):
     # 判断第一个词是否一致
     words1 = list(macropodus.cut(exists_vul_title))
     words2 = list(macropodus.cut(new_vul_title))
+    if not words1 or not words2:
+        return False
     if words1[0] != words2[0]:
         return False
 
