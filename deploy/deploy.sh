@@ -41,9 +41,17 @@ while true ; do
     esac
 done
 
+if [ -z "$START" ] || [ -z "$ENV" ] || [ -z "$TARGET_DIR" ]; then
+    usage
+fi
 
 if [[ "$TARGET_DIR" == */ ]] ; then
     TARGET_DIR=${TARGET_DIR%/}
+fi
+
+if [ "$TARGET_DIR" = "/" ] || [ "$TARGET_DIR" = "." ] || [ "$TARGET_DIR" = ".." ]; then
+    echo "Invalid TARGET_DIR: $TARGET_DIR"
+    exit 1
 fi
 
 if [ "$ENV" == "prod" ] ; then
@@ -147,7 +155,7 @@ ui_deploy(){
     cd /data/nginx/conf.d
     rm -rf sec.cafe.conf
     ln /data/www/sec.cafe/nginx/nginx.conf sec.cafe.conf
-    docker exec -it nginx nginx -s reload
+    docker exec nginx nginx -s reload
 }
 
 api_deploy(){
@@ -177,7 +185,7 @@ api_deploy(){
 
     cd $TARGET_DIR
     docker-compose -f docker-compose.api.yml up -d
-    docker exec -it nginx nginx -s reload
+    docker exec nginx nginx -s reload
 }
 
 build(){
@@ -201,7 +209,7 @@ init(){
     fi
     if [ "$CLEAN" ];then
         echo "Clean target directory..."
-        rm -rf $TARGET_DIR/*
+        rm -rf "$TARGET_DIR"/*
     fi
     cd $PWD_DIR
 }

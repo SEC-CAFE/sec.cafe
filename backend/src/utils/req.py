@@ -8,6 +8,9 @@ from typing import Any, Dict, Optional
 
 from src.utils.browser_http_req2 import Browser
 from src.models import api_redis as task_redis, browser_urls
+from src.conf.config import get_app_settings
+
+settings = get_app_settings()
 
 
 SPIDER_USER_AGENT_LIST = [
@@ -94,11 +97,12 @@ USER_AGENT_LIST.extend(SPIDER_USER_AGENT_LIST)
 
 
 class HttpReq(object):
-    def __init__(self, ua: str = ''):
+    def __init__(self, ua: str = '', verify_ssl: Optional[bool] = None):
         self.ua = ua
+        self.verify_ssl = settings.req_verify_ssl if verify_ssl is None else verify_ssl
 
     def _get_connector(self):
-        return aiohttp.TCPConnector(ttl_dns_cache=60, verify_ssl=False)
+        return aiohttp.TCPConnector(ttl_dns_cache=60, ssl=self.verify_ssl)
 
     def _build_header(self, custom_headers: Optional[Dict[str, Any]] = None):
         ua = self.ua if self.ua else random.choice(USER_AGENT_LIST)
@@ -166,14 +170,14 @@ class HttpReq(object):
     async def _get(self, url, params=None, headers=None):
         headers = headers or {}
         async with aiohttp.ClientSession(connector=self._get_connector()) as session:
-            async with session.get(url, params=params, headers=headers, ssl=False) as resp:
+            async with session.get(url, params=params, headers=headers, ssl=self.verify_ssl) as resp:
                 content = await resp.text(encoding='utf-8')
         return content, resp
 
     async def _post(self, url, data=None, headers=None):
         headers = headers or {}
         async with aiohttp.ClientSession(connector=self._get_connector()) as session:
-            async with session.post(url, data=data, headers=headers, ssl=False) as resp:
+            async with session.post(url, data=data, headers=headers, ssl=self.verify_ssl) as resp:
                 content = await resp.text(encoding='utf-8')
         return content, resp
 

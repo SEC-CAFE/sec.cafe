@@ -55,6 +55,7 @@ class AppSettings(BaseAppSettings):
 
     # req config
     req_ua: str = ''
+    req_verify_ssl: bool = False
 
     # open api
     openapi_key: str = ''
