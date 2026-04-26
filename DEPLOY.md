@@ -78,7 +78,7 @@ API部署同理backend部署
 * 备案与版权：`VITE_APP_ICP_NUM`、`VITE_APP_GA_NUM`、`VITE_APP_GA_CODE`、`VITE_APP_COPYRIGHT_TEXT`
 * 统计与广告：`VITE_APP_UMAMI_WEBSITE_ID`、`VITE_APP_BAIDU_HM_ID`、`VITE_APP_GOOGLE_ADS_*`
 * 页脚文案：`VITE_APP_FOOTER_SLOGAN`、`VITE_APP_FOOTER_PROJECT_*`
-* 模块开关（默认关闭）：`VITE_APP_SHOW_SPONSOR_PAGE`、`VITE_APP_SHOW_BOOK_RECOMMEND`、`VITE_APP_SHOW_AD_BLOCK`、`VITE_APP_SHOW_YEARLY_SPONSORS`
+* 模块开关：`VITE_APP_SHOW_SPONSOR_PAGE`、`VITE_APP_SHOW_UPDATE_WIDGET`、`VITE_APP_SHOW_BOOK_RECOMMEND`、`VITE_APP_SHOW_AD_BLOCK`、`VITE_APP_SHOW_YEARLY_SPONSORS`
 * 导航外链：`VITE_APP_NAV_EXTERNAL_LINKS`（JSON数组，可配置任意数量；`position=main/help`）
 * 联系方式与友情链接：`VITE_APP_CONTACT_*`、`VITE_APP_FRIEND_LINKS`
 * 爬虫说明页UA展示：`VITE_APP_SPIDER_UA`
@@ -86,6 +86,7 @@ API部署同理backend部署
 #### 前端内容配置文件
 * 关于我们：`frontend/src/config/about.config.js`
 * 赞助页/年度赞助商：`frontend/src/config/sponsor.config.js`
+* 更新公告：`frontend/src/config/update.config.js`
 
 #### 后端爬虫配置（`backend/.envs/prod.crawler.env`）
 * 请求配置：`REQ_UA`、`REQ_VERIFY_SSL`

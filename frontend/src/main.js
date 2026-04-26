@@ -130,6 +130,7 @@ app.provide('globalConfig', {
   copyrightText: import.meta.env.VITE_APP_COPYRIGHT_TEXT || 'Copyright © SEC.CAFE.',
   spiderUa: import.meta.env.VITE_APP_SPIDER_UA || 'sec_cafe(https://sec.cafe/spider)',
   showSponsorPage: parseBool(import.meta.env.VITE_APP_SHOW_SPONSOR_PAGE, false),
+  showUpdateWidget: parseBool(import.meta.env.VITE_APP_SHOW_UPDATE_WIDGET, true),
   showBookRecommend: parseBool(import.meta.env.VITE_APP_SHOW_BOOK_RECOMMEND, false),
   showAdsBlock: parseBool(import.meta.env.VITE_APP_SHOW_AD_BLOCK, false),
   showYearlySponsors: parseBool(import.meta.env.VITE_APP_SHOW_YEARLY_SPONSORS, false),

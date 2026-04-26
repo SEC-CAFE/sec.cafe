@@ -53,7 +53,7 @@
 - 备案与版权：`VITE_APP_ICP_NUM`、`VITE_APP_GA_NUM`、`VITE_APP_GA_CODE`、`VITE_APP_COPYRIGHT_TEXT`
 - 分析与广告：`VITE_APP_UMAMI_WEBSITE_ID`、`VITE_APP_BAIDU_HM_ID`、`VITE_APP_GOOGLE_ADS_*`
 - 页脚文案：`VITE_APP_FOOTER_SLOGAN`、`VITE_APP_FOOTER_PROJECT_*`
-- 模块开关（默认关闭）：`VITE_APP_SHOW_SPONSOR_PAGE`、`VITE_APP_SHOW_BOOK_RECOMMEND`、`VITE_APP_SHOW_AD_BLOCK`、`VITE_APP_SHOW_YEARLY_SPONSORS`
+- 模块开关：`VITE_APP_SHOW_SPONSOR_PAGE`、`VITE_APP_SHOW_UPDATE_WIDGET`、`VITE_APP_SHOW_BOOK_RECOMMEND`、`VITE_APP_SHOW_AD_BLOCK`、`VITE_APP_SHOW_YEARLY_SPONSORS`
 - 导航外链：`VITE_APP_NAV_EXTERNAL_LINKS`（JSON数组，可配置任意数量；`position=main/help`）
 - 联系方式：`VITE_APP_CONTACT_EMAIL`、`VITE_APP_CONTACT_WECHAT`、`VITE_APP_CONTACT_GROUP_HINT`
 - 爬虫说明页展示UA：`VITE_APP_SPIDER_UA`
@@ -62,6 +62,7 @@
 #### 前端内容配置文件（建议运营同学直接维护）
 - 关于我们内容：`frontend/src/config/about.config.js`
 - 赞助页/年度赞助商内容：`frontend/src/config/sponsor.config.js`
+- 更新公告模块：`frontend/src/config/update.config.js`
 
 #### 后端爬虫与相似性配置（`backend/.envs/prod.crawler.env`）
 - 爬虫请求UA：`REQ_UA`
