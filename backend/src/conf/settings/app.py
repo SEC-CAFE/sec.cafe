@@ -59,6 +59,8 @@ class AppSettings(BaseAppSettings):
 
     # open api
     openapi_key: str = ''
+    openapi_base_url: str = ''
+    openapi_model: str = 'gpt-4o-mini'
 
     secret_key: str = ""
     api_secret_key: str = ""

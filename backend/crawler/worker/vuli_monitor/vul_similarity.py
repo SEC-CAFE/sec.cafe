@@ -8,7 +8,8 @@ from crawler.utils.content_utils import replace_keyword
 from src.conf.config import get_app_settings
 
 settings = get_app_settings()
-openai.api_key = settings.openapi_key
+
+DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
 
 
 def _get_vul_time(exists_vul: dict, new_vul: dict):
@@ -91,16 +92,38 @@ def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
 
     try:
         chat_define = "你作为一个安全工程师，根据我输入的两段内容分别提取关键漏洞描述摘要，请先输出摘要，然后基于输出的摘要判断是否描述的是同个漏洞，只输出判断结果，结果格式：相同 or 不同"
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-0613",
-            temperature=0.4,
-            top_p=0.9,
-            messages=[
-                {"role": "system", "content": chat_define},
-                {"role": "user", "content": f"“{descript1}”和“{descript2}”"}
-            ]
-        )
-        result = completion.choices[0].message.content
+        model = settings.openapi_model if settings.openapi_model else DEFAULT_OPENAI_MODEL
+        messages = [
+            {"role": "system", "content": chat_define},
+            {"role": "user", "content": f"“{descript1}”和“{descript2}”"}
+        ]
+
+        # 兼容 openai 新旧 SDK：
+        # - 新版使用 OpenAI().chat.completions.create
+        # - 旧版使用 openai.ChatCompletion.create
+        if hasattr(openai, "OpenAI"):
+            kwargs = {"api_key": settings.openapi_key}
+            if settings.openapi_base_url:
+                kwargs["base_url"] = settings.openapi_base_url
+            client = openai.OpenAI(**kwargs)
+            completion = client.chat.completions.create(
+                model=model,
+                temperature=0.4,
+                top_p=0.9,
+                messages=messages
+            )
+            result = completion.choices[0].message.content or ''
+        else:
+            openai.api_key = settings.openapi_key
+            if settings.openapi_base_url:
+                openai.api_base = settings.openapi_base_url
+            completion = openai.ChatCompletion.create(
+                model=model,
+                temperature=0.4,
+                top_p=0.9,
+                messages=messages
+            )
+            result = completion.choices[0].message.content or ''
     except Exception:
         import traceback
         traceback.print_exc()
