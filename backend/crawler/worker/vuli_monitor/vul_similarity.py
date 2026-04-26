@@ -4,11 +4,14 @@
 import openai
 import json
 import datetime
+import logging
 import macropodus
+from functools import lru_cache
 from crawler.utils.content_utils import replace_keyword
 from src.conf.config import get_app_settings
 
 settings = get_app_settings()
+logger = logging.getLogger(__name__)
 
 DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
 DEFAULT_AI_PROMPT = (
@@ -116,6 +119,14 @@ def _parse_ai_result(text: str):
     return same, confidence
 
 
+@lru_cache(maxsize=4)
+def _get_openai_client(api_key: str, base_url: str):
+    kwargs = {"api_key": api_key}
+    if base_url:
+        kwargs["base_url"] = base_url
+    return openai.OpenAI(**kwargs)
+
+
 def if_not_same_vul(exists_vul: dict, new_vul: dict):
     """
     根据确定的规则检查是否明确不是同个漏洞
@@ -206,15 +217,13 @@ def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
         # - 新版使用 OpenAI().chat.completions.create
         # - 旧版使用 openai.ChatCompletion.create
         if hasattr(openai, "OpenAI"):
-            kwargs = {"api_key": settings.openapi_key}
-            if settings.openapi_base_url:
-                kwargs["base_url"] = settings.openapi_base_url
-            client = openai.OpenAI(**kwargs)
+            client = _get_openai_client(settings.openapi_key, settings.openapi_base_url or '')
             completion = client.chat.completions.create(
                 model=model,
                 temperature=0.4,
                 top_p=0.9,
-                messages=messages
+                messages=messages,
+                timeout=30,
             )
             result = completion.choices[0].message.content or ''
         else:
@@ -225,12 +234,12 @@ def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
                 model=model,
                 temperature=0.4,
                 top_p=0.9,
-                messages=messages
+                messages=messages,
+                request_timeout=30,
             )
             result = completion.choices[0].message.content or ''
-    except Exception:
-        import traceback
-        traceback.print_exc()
+    except Exception as exc:
+        logger.warning("AI similarity check failed: %s", exc)
         result = ''
     same, confidence = _parse_ai_result(result)
     if same and confidence >= settings.vul_similarity_ai_min_confidence:

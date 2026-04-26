@@ -8,7 +8,7 @@ import Spider from './pages/Spider.vue'
 import Login from './pages/Login.vue'
 import LoginCallback from './pages/LoginCallback.vue'
 
-import { useAuthStore } from './store/modules/auth'
+import store from './store'
 
 const routerHistory = createWebHistory()
 
@@ -61,9 +61,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const authUser = useAuthStore();
-  authUser.checkUser();
-  const isAuthenticated = authUser.isLoggedIn;
+  const user = store.getters.logined_user || {}
+  const isAuthenticated = Boolean(user && user.name)
   if (to.meta.requiresAuth && !isAuthenticated) {
     localStorage.removeItem('sec_cafe_redirect');
     localStorage.setItem('sec_cafe_redirect', to.path);

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { defineStore } from 'pinia';
 
 function deleteStorage(){
   localStorage.removeItem('sec_cafe_user');
@@ -81,7 +80,7 @@ const actions = {
     await commit('setLoginedUser', data);
   },
   async getLoginedUser({commit}) {
-    let {data} = userStorageFormat();
+    const data = userStorageFormat();
     await commit('setLoginedUser', data);
   },
   async logOut({commit}) {
@@ -109,16 +108,3 @@ export default {
   actions,
   mutations
 };
-
-export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: {},
-    isLoggedIn: false,
-  }),
-  actions: {
-    checkUser() {
-      this.user = userStorageFormat()
-      if (this.user.name) this.isLoggedIn = true;
-    }
-  },
-});

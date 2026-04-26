@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import axios from 'axios'
 import {createHead} from '@vueuse/head'
-import { createPinia } from 'pinia'
 
 import router from './router'
 import App from './App.vue'
@@ -9,7 +8,6 @@ import store from './store'
 
 import './css/style.css'
 
-const pinia = createPinia()
 const app = createApp(App)
 
 const parseJsonConfig = (value, fallback) => {
@@ -57,7 +55,7 @@ try {
   let access_token = token_obj == null ? '' : token_obj.token;
   axios.defaults.headers.common['Authorization'] = 'Bearer '+ access_token;
 } catch (e) {
-  localStorage.removeItem('sec_cafe_token');
+  localStorage.removeItem('sec_cafe_user');
 }
 
 axios.defaults.withCredentials = true;
@@ -134,7 +132,6 @@ app.provide('globalConfig', {
 ensureGoogleAdsScript(import.meta.env.VITE_APP_GOOGLE_ADS_CLIENT)
 ensureUmamiScript(import.meta.env.VITE_APP_UMAMI_SCRIPT_URL, import.meta.env.VITE_APP_UMAMI_WEBSITE_ID)
 
-app.use(pinia)
 app.use(router)
 app.use(store);
 app.use(createHead());

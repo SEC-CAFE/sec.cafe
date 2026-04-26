@@ -17,6 +17,12 @@ usage(){
 ARGS=`getopt -o s:e:t:d:n:c -l start:,env:,target_dir:,dbs:,brwoser_num:,clean -- "$@"`
 eval set -- "$ARGS"
 
+# Optional nginx integration for ui/api deployment.
+# If NGINX_CONF_DIR is empty, skip host nginx symlink and reload.
+NGINX_CONF_DIR=${NGINX_CONF_DIR:-}
+NGINX_SITE_CONF_NAME=${NGINX_SITE_CONF_NAME:-sec.cafe.conf}
+NGINX_RELOAD_CONTAINER=${NGINX_RELOAD_CONTAINER:-nginx}
+
 
 while true ; do
     case "$1" in
@@ -152,10 +158,7 @@ ui_deploy(){
 
     cd $TARGET_DIR
     docker-compose -f docker-compose.ui.yml up -d
-    cd /data/nginx/conf.d
-    rm -rf sec.cafe.conf
-    ln /data/www/sec.cafe/nginx/nginx.conf sec.cafe.conf
-    docker exec nginx nginx -s reload
+    reload_nginx_if_needed
 }
 
 api_deploy(){
@@ -185,7 +188,7 @@ api_deploy(){
 
     cd $TARGET_DIR
     docker-compose -f docker-compose.api.yml up -d
-    docker exec nginx nginx -s reload
+    reload_nginx_if_needed
 }
 
 build(){
@@ -193,6 +196,26 @@ build(){
     export VERSION=1.0
     docker build . -t sec_cafe_backend:${VERSION}
     cd ../deploy
+}
+
+reload_nginx_if_needed(){
+    if [ -z "$NGINX_CONF_DIR" ]; then
+        echo "Skip nginx host config: NGINX_CONF_DIR is empty."
+        return 0
+    fi
+
+    if [ ! -d "$NGINX_CONF_DIR" ]; then
+        echo "Skip nginx host config: NGINX_CONF_DIR not found -> $NGINX_CONF_DIR"
+        return 0
+    fi
+
+    ln -sfn "$TARGET_DIR/nginx/nginx.conf" "$NGINX_CONF_DIR/$NGINX_SITE_CONF_NAME"
+
+    if docker ps --format '{{.Names}}' | grep -q "^${NGINX_RELOAD_CONTAINER}$"; then
+        docker exec "$NGINX_RELOAD_CONTAINER" nginx -s reload
+    else
+        echo "Skip nginx reload: container not found -> $NGINX_RELOAD_CONTAINER"
+    fi
 }
 
 init(){
