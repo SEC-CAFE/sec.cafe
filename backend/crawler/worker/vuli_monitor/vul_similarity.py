@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import openai
+import json
 import datetime
 import macropodus
 from crawler.utils.content_utils import replace_keyword
@@ -10,6 +11,12 @@ from src.conf.config import get_app_settings
 settings = get_app_settings()
 
 DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
+DEFAULT_AI_PROMPT = (
+    "你是安全漏洞去重助手。根据输入的两条漏洞数据，判断是否描述同一漏洞。"
+    "仅输出JSON，不要输出其他文本。格式："
+    "{\"same\": true/false, \"confidence\": 0-1之间小数, \"reason\": \"一句中文理由\"}。"
+    "若证据不足请返回 same=false 且 confidence<=0.5。"
+)
 
 
 def _parse_time(value):
@@ -48,6 +55,65 @@ def _day_offset(day1, day2, default=-1):
     if not day1 or not day2:
         return default
     return abs((day2 - day1).days)
+
+
+def _normalize_text(value: str, max_len: int):
+    if not value:
+        return ''
+    value = value.strip().replace('\r', ' ').replace('\n', ' ')
+    return value[:max_len]
+
+
+def _build_ai_payload(vul: dict):
+    max_len = max(200, settings.vul_similarity_ai_max_desc_len)
+    return {
+        "title": _normalize_text(vul.get('title', ''), 300),
+        "descript": _normalize_text(vul.get('descript', ''), max_len),
+        "cve": vul.get('cve') or '',
+        "cnnvd": vul.get('cnnvd') or '',
+        "cnvd": vul.get('cnvd') or '',
+        "url": vul.get('url') or '',
+        "source": vul.get('source', {}).get('name', ''),
+        "publish_time": vul.get('publish_time') or '',
+        "update_time": vul.get('update_time') or '',
+    }
+
+
+def _parse_ai_result(text: str):
+    if not text:
+        return False, 0.0
+    text = text.strip()
+
+    # 兼容历史提示词输出：相同 / 不同
+    if "不同" in text:
+        return False, 1.0
+    if "相同" in text:
+        return True, 1.0
+
+    # 优先按严格JSON解析；失败时尝试提取首个JSON对象。
+    result_json = None
+    try:
+        result_json = json.loads(text)
+    except Exception:
+        start = text.find('{')
+        end = text.rfind('}')
+        if start >= 0 and end > start:
+            try:
+                result_json = json.loads(text[start:end + 1])
+            except Exception:
+                result_json = None
+
+    if not isinstance(result_json, dict):
+        return False, 0.0
+
+    same = bool(result_json.get('same', False))
+    confidence = result_json.get('confidence', 0)
+    try:
+        confidence = float(confidence)
+    except Exception:
+        confidence = 0.0
+    confidence = max(0.0, min(1.0, confidence))
+    return same, confidence
 
 
 def if_not_same_vul(exists_vul: dict, new_vul: dict):
@@ -100,8 +166,13 @@ def check_by_tag_num(new_vul: dict, model):
 
 
 def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
-    descript1 = exists_vul.get('descript', '').lower()
-    descript2 = new_vul.get('descript', '').lower()
+    if not settings.vul_similarity_ai_enabled:
+        return False
+    if not settings.openapi_key:
+        return False
+
+    descript1 = exists_vul.get('descript', '')
+    descript2 = new_vul.get('descript', '')
     _times = _get_vul_time(exists_vul, new_vul)
     exists_vul_publish_time = _times[0]
     new_vul_publish_time = _times[2]
@@ -116,11 +187,19 @@ def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
         return False
 
     try:
-        chat_define = settings.vul_similarity_ai_prompt
+        chat_define = settings.vul_similarity_ai_prompt or DEFAULT_AI_PROMPT
         model = settings.openapi_model if settings.openapi_model else DEFAULT_OPENAI_MODEL
+        vul_a = _build_ai_payload(exists_vul)
+        vul_b = _build_ai_payload(new_vul)
         messages = [
             {"role": "system", "content": chat_define},
-            {"role": "user", "content": f"“{descript1}”和“{descript2}”"}
+            {
+                "role": "user",
+                "content": json.dumps(
+                    {"vul_a": vul_a, "vul_b": vul_b},
+                    ensure_ascii=False,
+                )
+            }
         ]
 
         # 兼容 openai 新旧 SDK：
@@ -153,11 +232,8 @@ def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
         import traceback
         traceback.print_exc()
         result = ''
-    if '\n' in result:
-        result = result.rsplit('\n', 1)[1].strip()
-    if result and "不同" in result:
-        return False
-    if result and "相同" in result:
+    same, confidence = _parse_ai_result(result)
+    if same and confidence >= settings.vul_similarity_ai_min_confidence:
         return True
     return False
 
@@ -211,9 +287,8 @@ def check_by_title_and_descript(exists_vul: dict, new_vul: dict):
     ) or sents > settings.vul_similarity_title_threshold_far:
         return True
     
-    if settings.openapi_key:
-        if check_by_descript_with_openai(exists_vul, new_vul):
-            return True
+    if check_by_descript_with_openai(exists_vul, new_vul):
+        return True
 
     return False
 

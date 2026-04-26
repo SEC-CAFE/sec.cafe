@@ -67,7 +67,10 @@ class AppSettings(BaseAppSettings):
     vul_similarity_title_threshold_far: float = 0.9
     vul_similarity_time_window_days: int = 1
     vul_similarity_ai_publish_day_diff: int = 0
-    vul_similarity_ai_prompt: str = "你作为一个安全工程师，根据我输入的两段内容分别提取关键漏洞描述摘要，请先输出摘要，然后基于输出的摘要判断是否描述的是同个漏洞，只输出判断结果，结果格式：相同 or 不同"
+    vul_similarity_ai_prompt: str = "你是安全漏洞去重助手。根据输入的两条漏洞数据，判断是否描述同一漏洞。仅输出JSON，不要输出其他文本。格式：{\"same\": true/false, \"confidence\": 0-1之间小数, \"reason\": \"一句中文理由\"}。若证据不足请返回 same=false 且 confidence<=0.5。"
+    vul_similarity_ai_enabled: bool = True
+    vul_similarity_ai_max_desc_len: int = 1500
+    vul_similarity_ai_min_confidence: float = 0.7
 
     secret_key: str = ""
     api_secret_key: str = ""
