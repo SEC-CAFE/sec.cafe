@@ -98,7 +98,7 @@ USER_AGENT_LIST.extend(SPIDER_USER_AGENT_LIST)
 
 class HttpReq(object):
     def __init__(self, ua: str = '', verify_ssl: Optional[bool] = None):
-        self.ua = ua
+        self.ua = ua if ua else settings.req_ua
         self.verify_ssl = settings.req_verify_ssl if verify_ssl is None else verify_ssl
 
     def _get_connector(self):

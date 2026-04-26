@@ -107,8 +107,7 @@ app.provide('globalConfig', {
   umamiScriptUrl: import.meta.env.VITE_APP_UMAMI_SCRIPT_URL || '',
   umamiWebsiteId: import.meta.env.VITE_APP_UMAMI_WEBSITE_ID || '',
   footerSlogan: import.meta.env.VITE_APP_FOOTER_SLOGAN || '',
-  footerProjectName: import.meta.env.VITE_APP_FOOTER_PROJECT_NAME || 'Powered By SEC.CAFE',
-  footerProjectUrl: import.meta.env.VITE_APP_FOOTER_PROJECT_URL || 'https://sec.cafe',
+  spiderUa: import.meta.env.VITE_APP_SPIDER_UA || 'sec_cafe(https://sec.cafe/spider)',
   friendLinks: parseJsonConfig(import.meta.env.VITE_APP_FRIEND_LINKS, [
     { name: 'SEC.CAFE 安全咖啡', url: 'https://sec.cafe?ref=github_opensource' },
     { name: 'SECSOSO 安全搜搜', url: 'https://secsoso.com?ref=https://sec.cafe' },

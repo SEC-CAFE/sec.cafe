@@ -32,7 +32,7 @@
                         <li>漏洞情报等相关信息聚合尽量减少非必要信息展示，详情引导跳转到源链接；</li>
                         <li>在相关页面标注内容，禁止用于商业用途。</li>
                     </ul>
-                    <p>爬虫 UA 统一为<span class="text-slate-800 dark:text-slate-100 font-medium ">sec_cafe(https://sec.cafe/spider)</span>，如造成影响，请联系站长：<a class="hover:underline" href="mailto:f00y1n9@gmail.com">f00y1n9#gmail.com</a>(邮箱) fooying(微信)</p>
+                    <p>爬虫 UA 统一为<span class="text-slate-800 dark:text-slate-100 font-medium ">{{ globalConfig.spiderUa }}</span>，如造成影响，请联系站长：<a class="hover:underline" href="mailto:f00y1n9@gmail.com">f00y1n9#gmail.com</a>(邮箱) fooying(微信)</p>
                   </div>
 
                   <div class="space-y-4">
@@ -153,6 +153,7 @@ export default {
       { name: 'CISA KEV', url: 'https://www.cisa.gov/known-exploited-vulnerabilities-catalog', status: '在线' },
     ]
     return {
+      globalConfig,
       qrCodes,
       vuli_sources,
       getDom

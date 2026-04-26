@@ -1,5 +1,10 @@
 ## 爬取YAML配置说明
 
+### UA配置
+- 后端爬虫请求UA使用 `backend/.envs/*.env` 中的 `REQ_UA`（未配置则随机UA）。
+- 前端「情报源及爬虫说明」页面展示使用 `frontend/.env.*` 中的 `VITE_APP_SPIDER_UA`。
+- 建议将 `REQ_UA` 与 `VITE_APP_SPIDER_UA` 配置为同一值，保持对外说明与实际请求一致。
+
 ### 
 默认使用jquery的选择器方式进行选择
 
