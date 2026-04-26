@@ -82,8 +82,8 @@ axios.interceptors.response.use(
   },
   error => {
     if (error) {
-      const originalRequest = error.config;
-      if (error.response.status === 401 && !originalRequest._retry) {
+      const originalRequest = error.config || {};
+      if (error.response && error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         store.dispatch('logOut');
         localStorage.removeItem('sec_cafe_redirect');
@@ -91,6 +91,7 @@ axios.interceptors.response.use(
         return router.push('/auth/login')
       }
     }
+    return Promise.reject(error)
   }
 );
 

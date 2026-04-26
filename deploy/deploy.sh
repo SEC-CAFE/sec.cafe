@@ -130,10 +130,8 @@ ui_deploy(){
 
     if [ -d ../dist ]; then
         cp -r ../dist/* $TARGET_DIR/html/
-    elif [ -d ../frontend ]; then
-        cp -r ../frontend/* $TARGET_DIR/html/
     else
-        echo "No frontend assets found: expected ../dist or ../frontend"
+        echo "No frontend dist assets found at ../dist. Please run frontend build first."
         exit 1
     fi
     cp -r nginx/ui_nginx.conf $TARGET_DIR/nginx/nginx.conf
