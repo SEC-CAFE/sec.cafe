@@ -44,6 +44,12 @@ def _get_vul_time(exists_vul: dict, new_vul: dict):
     return new_times
 
 
+def _day_offset(day1, day2, default=-1):
+    if not day1 or not day2:
+        return default
+    return abs((day2 - day1).days)
+
+
 def if_not_same_vul(exists_vul: dict, new_vul: dict):
     """
     根据确定的规则检查是否明确不是同个漏洞
@@ -103,11 +109,14 @@ def check_by_descript_with_openai(exists_vul: dict, new_vul: dict):
     if not descript1 or not descript2 or not exists_vul_publish_time or not new_vul_publish_time:
         return False
 
-    if exists_vul_publish_time != new_vul_publish_time:  # 非同一天漏洞不做判断
+    publish_time_offset = _day_offset(exists_vul_publish_time, new_vul_publish_time)
+    if publish_time_offset < 0:
+        return False
+    if publish_time_offset > settings.vul_similarity_ai_publish_day_diff:
         return False
 
     try:
-        chat_define = "你作为一个安全工程师，根据我输入的两段内容分别提取关键漏洞描述摘要，请先输出摘要，然后基于输出的摘要判断是否描述的是同个漏洞，只输出判断结果，结果格式：相同 or 不同"
+        chat_define = settings.vul_similarity_ai_prompt
         model = settings.openapi_model if settings.openapi_model else DEFAULT_OPENAI_MODEL
         messages = [
             {"role": "system", "content": chat_define},
@@ -189,19 +198,17 @@ def check_by_title_and_descript(exists_vul: dict, new_vul: dict):
     sents = macropodus.sim(exists_vul_title, new_vul_title, type_sim="total", type_encode="avg")
 
     # 如果发布/更新日期相差1天内，则相似度要求降低；否则要求较高
-    publish_time_offset = -1
-    update_time_offset = -1
-    if exists_vul_publish_time and new_vul_publish_time:  # 根据发布时间对比
-        publish_time_offset = new_vul_publish_time - exists_vul_publish_time
-        publish_time_offset = abs(publish_time_offset.days)
+    publish_time_offset = _day_offset(exists_vul_publish_time, new_vul_publish_time)
+    update_time_offset = _day_offset(exists_vul_update_time, new_vul_update_time)
+    time_window_days = settings.vul_similarity_time_window_days
+    time_offset_check = (
+        (publish_time_offset >= 0 and publish_time_offset <= time_window_days) or
+        (update_time_offset >= 0 and update_time_offset <= time_window_days)
+    )
 
-    if exists_vul_update_time and new_vul_update_time:  # 根据更新时间对比
-        update_time_offset = new_vul_update_time - exists_vul_update_time
-        update_time_offset = abs(update_time_offset.days)
-
-    time_offset_check = publish_time_offset in [0, 1] or update_time_offset in [0, 1]
-
-    if (sents > 0.65 and time_offset_check) or sents > 0.9:
+    if (
+        sents > settings.vul_similarity_title_threshold_near and time_offset_check
+    ) or sents > settings.vul_similarity_title_threshold_far:
         return True
     
     if settings.openapi_key:

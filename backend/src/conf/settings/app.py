@@ -62,6 +62,13 @@ class AppSettings(BaseAppSettings):
     openapi_base_url: str = ''
     openapi_model: str = 'gpt-4o-mini'
 
+    # vul similarity
+    vul_similarity_title_threshold_near: float = 0.65
+    vul_similarity_title_threshold_far: float = 0.9
+    vul_similarity_time_window_days: int = 1
+    vul_similarity_ai_publish_day_diff: int = 0
+    vul_similarity_ai_prompt: str = "你作为一个安全工程师，根据我输入的两段内容分别提取关键漏洞描述摘要，请先输出摘要，然后基于输出的摘要判断是否描述的是同个漏洞，只输出判断结果，结果格式：相同 or 不同"
+
     secret_key: str = ""
     api_secret_key: str = ""
     api_access_token_expire_minutes: int = 0
