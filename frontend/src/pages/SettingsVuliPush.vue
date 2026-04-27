@@ -95,8 +95,14 @@
                             </span>
                           </div>
                           <div class="text-xs text-slate-500 dark:text-slate-400">
-                            不配置关键词时，推送所有漏洞情报；配置后，命中任意关键词才会推送。
+                            不配置关键词时，推送所有漏洞情报；配置后，命中任意关键词才会推送。关键词过滤不支持RSS订阅、API主动请求。
                           </div>
+                          <div class="text-xs text-slate-500 dark:text-slate-400">
+                            编辑关键词后请点击“更新/订阅”进行保存。
+                          </div>
+                          <Banner2 v-if="hasUnsavedFormChanges" type="warn" :open="banner2KeywordOpen">
+                            配置已变更但尚未保存，请点击“更新/订阅”保存后生效。
+                          </Banner2>
                           <div>
                             <label class="block text-sm font-medium mb-1" for="keyword_match_scope">关键词匹配范围</label>
                             <select id="keyword_match_scope" class="form-select w-full md:w-64" v-model="form.keyword_match_scope">
@@ -149,7 +155,7 @@
 
 <script>
 import { ref, inject } from 'vue'
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 
 import SideNavigation from '../partials/SideNavigation.vue'
 import Header from '../partials/Header.vue'
@@ -172,6 +178,7 @@ export default {
   setup() {
     const banner2ErrorOpen = ref(true)
     const banner2SuccessOpen = ref(true)
+    const banner2KeywordOpen = ref(true)
     const globalConfig = inject('globalConfig');
     const pageKeywords = '';
     useHead({
@@ -190,14 +197,12 @@ export default {
     });
     return {
       banner2ErrorOpen,
-      banner2SuccessOpen
+      banner2SuccessOpen,
+      banner2KeywordOpen
     }
   },
   created: function() {
     return this.$store.dispatch('getVuliPushUrl');
-  },
-  computed: {
-    ...mapGetters({vuli_push_url: 'stateVuliPushUrl', setting_result: 'stateSettingResult'}),
   },
   watch: {
     vuli_push_url: {
@@ -209,10 +214,43 @@ export default {
         this.form.sign = config.sign || ''
         this.form.keywords = Array.isArray(config.keywords) ? config.keywords : []
         this.form.keyword_match_scope = config.keyword_match_scope || 'title'
+        this.savedFormSnapshot = this.getFormSnapshot(this.form)
+      }
+    },
+    setting_result: {
+      immediate: false,
+      handler(value) {
+        if (value && typeof value === 'object' && value.type === '' && value.msg && value.msg.includes('成功')) {
+          this.savedFormSnapshot = this.getFormSnapshot(this.form)
+        }
       }
     }
   },
+  computed: {
+    ...mapGetters({vuli_push_url: 'stateVuliPushUrl', setting_result: 'stateSettingResult'}),
+    hasUnsavedFormChanges() {
+      const current = this.getFormSnapshot(this.form)
+      return current !== this.savedFormSnapshot
+    }
+  },
   methods: {
+    getFormSnapshot(form) {
+      const normalizedKeywords = (Array.isArray(form.keywords) ? form.keywords : [])
+        .map(v => String(v).trim())
+        .filter(Boolean)
+      return JSON.stringify({
+        push_type: String(form.push_type || ''),
+        hook_url: String(form.hook_url || '').trim(),
+        sign: String(form.sign || '').trim(),
+        keywords: normalizedKeywords,
+        keyword_match_scope: String(form.keyword_match_scope || 'title')
+      })
+    },
+    handleBeforeUnload(event) {
+      if (!this.hasUnsavedFormChanges) return
+      event.preventDefault()
+      event.returnValue = '订阅配置尚未保存，确认离开吗？'
+    },
     addKeyword() {
       const value = (this.keywordInput || '').trim()
       if (!value) return
@@ -236,6 +274,10 @@ export default {
       });
     },
     check_hook_url(){
+      if (this.hasUnsavedFormChanges) {
+        const ok = window.confirm('订阅配置尚未保存，是否继续仅测试发送？')
+        if (!ok) return
+      }
       this.$store.dispatch('checkVuliPushUrl', {
         'push_type': this.form.push_type,
         'hook_url': this.form.hook_url,
@@ -246,9 +288,16 @@ export default {
     },
 
   },
+  mounted() {
+    window.addEventListener('beforeunload', this.handleBeforeUnload)
+  },
+  beforeUnmount() {
+    window.removeEventListener('beforeunload', this.handleBeforeUnload)
+  },
   data(){
     return {
       keywordInput: '',
+      savedFormSnapshot: JSON.stringify({ push_type: '', hook_url: '', sign: '', keywords: [], keyword_match_scope: 'title' }),
       form: {
         push_type: 'dingding',
         hook_url: '',
@@ -265,6 +314,6 @@ export default {
 
       ]
     }
-  }
+  },
 }
 </script>
