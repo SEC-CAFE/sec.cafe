@@ -1,4 +1,5 @@
 import re
+from typing import List, Literal
 from pydantic import BaseModel
 from src.models import db_object
 
@@ -25,6 +26,8 @@ class VuliPushIteam(BaseModel):
     push_type: str = ''
     hook_url: str = ''
     sign: str = ''
+    keywords: List[str] = []
+    keyword_match_scope: Literal['title', 'title_desc'] = 'title'
 
 
 def check_value(item):
@@ -41,6 +44,16 @@ def check_value(item):
 
     if not re.match(pattern, item.hook_url):
         return {'type': 'error', 'msg': '请输入正确的订阅地址(仅限网址和邮箱地址)！'}
+
+    if item.keyword_match_scope not in ('title', 'title_desc'):
+        return {'type': 'error', 'msg': '关键词匹配范围不正确，请重试！'}
+
+    if len(item.keywords) > 20:
+        return {'type': 'error', 'msg': '关键词最多可配置20个，请精简后重试！'}
+
+    for _k in item.keywords:
+        if len(_k) > 50:
+            return {'type': 'error', 'msg': '单个关键词长度不能超过50个字符！'}
     return {}
 
 
@@ -51,7 +64,12 @@ async def get_vuli_push_url(current_user: UserModel = Depends(get_current_user))
         setting = Setting.get_or_none(user=current_user, key=key)
         if not setting:
             return None
-        return setting.value
+        value = setting.value or {}
+        if not isinstance(value, dict):
+            return None
+        value.setdefault('keywords', [])
+        value.setdefault('keyword_match_scope', 'title')
+        return value
 
 
 @router.post("/set_vuli_push_url", include_in_schema=False)
@@ -60,7 +78,23 @@ async def set_vuli_push_url(item: VuliPushIteam = Body(...), current_user: UserM
     if cehck_result:
         return cehck_result
 
-    value = {'push_type': item.push_type, 'hook_url': item.hook_url, 'sign': item.sign}
+    # normalize keywords: trim/unique while preserving order
+    keywords = []
+    seen = set()
+    for _k in item.keywords:
+        _k = str(_k).strip()
+        if not _k or _k in seen:
+            continue
+        seen.add(_k)
+        keywords.append(_k)
+
+    value = {
+        'push_type': item.push_type,
+        'hook_url': item.hook_url,
+        'sign': item.sign,
+        'keywords': keywords,
+        'keyword_match_scope': item.keyword_match_scope
+    }
     with db_object.allow_sync():
         key = 'hook_url'
         setting = Setting.get_or_none(user=current_user, key=key)

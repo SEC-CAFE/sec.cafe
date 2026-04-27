@@ -3,6 +3,7 @@
 
 import time
 import asyncio
+from typing import Dict, List
 from loguru import logger
 from src.utils.msg import HookPushMsg
 from src.models import db_object
@@ -21,6 +22,55 @@ MSG_TYPES = {
     'custom': HMSG.custom,
     'mail': HMSG.mail,
 }
+
+
+def _normalize_push_config(item: Dict) -> Dict:
+    if not isinstance(item, dict):
+        return {}
+    push_type = item.get('push_type', '')
+    hook_url = item.get('hook_url', '')
+    sign = item.get('sign', '')
+    keywords = item.get('keywords', []) or []
+    if not isinstance(keywords, list):
+        keywords = []
+    keywords = [str(_k).strip() for _k in keywords if str(_k).strip()]
+    keyword_match_scope = item.get('keyword_match_scope', 'title')
+    if keyword_match_scope not in ('title', 'title_desc'):
+        keyword_match_scope = 'title'
+    return {
+        'push_type': push_type,
+        'hook_url': hook_url,
+        'sign': sign,
+        'keywords': keywords,
+        'keyword_match_scope': keyword_match_scope
+    }
+
+
+def _filter_vuls_by_keywords(vuls: List[Dict], keywords: List[str], scope: str) -> List[Dict]:
+    if not keywords:
+        return vuls
+
+    result = []
+    normalized_keywords = [k.lower() for k in keywords]
+    for _v in vuls:
+        title = str(_v.get('title', '')).lower()
+        descript = str(_v.get('descript', '')).lower()
+        content = title if scope == 'title' else f'{title}\n{descript}'
+        # 任意关键词命中即可推送
+        if any(k in content for k in normalized_keywords):
+            result.append(_v)
+    return result
+
+
+def _to_push_vuls(vuls: List[Dict]) -> List[Dict]:
+    # keep the historical payload shape for all push channels
+    return [
+        {
+            'title': _v.get('title', ''),
+            'source_num': _v.get('source_num', 0),
+            'publish_time': _v.get('publish_time', '')
+        } for _v in vuls
+    ]
 
 
 @celery_app.task(name='task.vuli_pusher.create_task', ignore_result=True)
@@ -64,6 +114,7 @@ async def _create_task(debug: bool = False):
                     vul_list.append(
                         {
                             'title': title,
+                            'descript': _v.descript or '',
                             'source_num': source_num,
                             'publish_time': str(_v.publish_time)[:10]
                         }
@@ -79,8 +130,11 @@ async def _create_task(debug: bool = False):
 
                     task_settings = Setting.select().where(Setting.key == 'hook_url')
                     for _t in task_settings:
-                        push_type = _t.value['push_type']
-                        tasks[push_type].append(_t.value)
+                        config = _normalize_push_config(_t.value)
+                        push_type = config.get('push_type')
+                        if push_type not in tasks:
+                            continue
+                        tasks[push_type].append(config)
 
                     logger.info(f'Get task settings, {str(tasks)}')
 
@@ -91,12 +145,21 @@ async def _create_task(debug: bool = False):
 
                         num = 0
                         for _v in tasks[push_type]:
+                            matched_vuls = _filter_vuls_by_keywords(
+                                vul_list,
+                                _v.get('keywords', []),
+                                _v.get('keyword_match_scope', 'title')
+                            )
+                            push_vuls = _to_push_vuls(matched_vuls)
+                            if not matched_vuls:
+                                logger.info(f'Skip {push_type} task, no keyword matched for hook_url={_v.get("hook_url")}')
+                                continue
                             if debug:
-                                await _pusher(vul_list, _v['hook_url'], _v['sign'], push_type, debug)
+                                await _pusher(push_vuls, _v['hook_url'], _v['sign'], push_type, debug)
                             else:
                                 celery_app.send_task(
                                     'task.vuli_pusher.{}'.format(push_type),
-                                    args=(vul_list, _v['hook_url'], _v['sign'], debug)
+                                    args=(push_vuls, _v['hook_url'], _v['sign'], debug)
                                 )
                             num += 1
                         logger.info(f'Create {push_type} task, num: {num}')
@@ -105,16 +168,26 @@ async def _create_task(debug: bool = False):
                     length = len(tasks['mail'])
                     num = 0
                     for _v in tasks['mail']:
+                        matched_vuls = _filter_vuls_by_keywords(
+                            vul_list,
+                            _v.get('keywords', []),
+                            _v.get('keyword_match_scope', 'title')
+                        )
+                        push_vuls = _to_push_vuls(matched_vuls)
+                        if not matched_vuls:
+                            logger.info(f'Skip mail task, no keyword matched for hook_url={_v.get("hook_url")}')
+                            length -= 1
+                            continue
                         receiver.append(_v['hook_url'])
                         length -= 1
 
                         if len(receiver) == 1 or length <= 0:
                             if debug:
-                                await _pusher(vul_list, _v['hook_url'], _v['sign'], 'mail', debug)
+                                await _pusher(push_vuls, _v['hook_url'], _v['sign'], 'mail', debug)
                             else:
                                 celery_app.send_task(
                                     'task.vuli_pusher.mail',
-                                    args=(vul_list, receiver, _v['sign'], debug)
+                                    args=(push_vuls, receiver, _v['sign'], debug)
                                 )
                             receiver = []
                             num += 1

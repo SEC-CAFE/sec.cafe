@@ -54,29 +54,62 @@
                         <div class="flex gap-5">
                           <div>
                             <label class="block text-sm font-medium mb-1" for="push_type">推送方式</label>
-                            <select id="push_type" class="form-select" v-model="selectedValue" ref="push_type">
+                            <select id="push_type" class="form-select" v-model="form.push_type" ref="push_type">
                               <option :key="item.value" v-for="item in options" :value="item.value" >{{ item.name }}</option>
                             </select>
                           </div>
                           <div>
                             <label class="block text-sm font-medium mb-1" for="hook_url">签名(可选)</label>
                             <div class="flex flex-col md:flex-row justify-center max-w-xs mx-auto md:max-w-md md:mx-0">
-                              <input id="sign" type="text" class="form-input w-full mb-2 md:mb-0 md:mr-2" :value="vuli_push_url.sign" ref="sign"/>
+                              <input id="sign" type="text" class="form-input w-full mb-2 md:mb-0 md:mr-2" v-model="form.sign" ref="sign"/>
                             </div>
                           </div>
                           <div class="w-full">
                             <label class="block text-sm font-medium mb-1" for="hook_url">Webhook网址/邮箱地址</label>
                             <div class="flex flex-col md:flex-row justify-center max-w-xs mx-auto md:max-w-md md:mx-0">
-                              <input id="hook_url" type="text" class="form-input w-full mb-2 md:mb-0 md:mr-2" :value="vuli_push_url.hook_url" ref="hook_url"/>
+                              <input id="hook_url" type="text" class="form-input w-full mb-2 md:mb-0 md:mr-2" v-model="form.hook_url" ref="hook_url"/>
                               <button class="btn text-white bg-sky-500 hover:bg-sky-600" @click="update_hook_url">更新/订阅</button>
                             </div>
+                          </div>
+                        </div>
+
+                        <div class="mt-4 space-y-3">
+                          <div class="flex items-end gap-3">
+                            <div class="grow">
+                              <label class="block text-sm font-medium mb-1" for="keyword_input">关键词过滤（可选）</label>
+                              <input
+                                id="keyword_input"
+                                type="text"
+                                class="form-input w-full"
+                                v-model="keywordInput"
+                                @keyup.enter="addKeyword"
+                                placeholder="输入关键词后回车，例如：OpenSSH"
+                              />
+                            </div>
+                            <button class="btn text-white bg-slate-600 hover:bg-slate-700" @click="addKeyword">添加</button>
+                          </div>
+                          <div class="flex flex-wrap gap-2" v-if="form.keywords.length">
+                            <span v-for="(item, idx) in form.keywords" :key="`${item}-${idx}`" class="inline-flex items-center rounded-full bg-sky-100 text-sky-700 px-3 py-1 text-xs">
+                              {{ item }}
+                              <button class="ml-2 text-sky-600 hover:text-sky-800" @click="removeKeyword(idx)">×</button>
+                            </span>
+                          </div>
+                          <div class="text-xs text-slate-500 dark:text-slate-400">
+                            不配置关键词时，推送所有漏洞情报；配置后，命中任意关键词才会推送。
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium mb-1" for="keyword_match_scope">关键词匹配范围</label>
+                            <select id="keyword_match_scope" class="form-select w-full md:w-64" v-model="form.keyword_match_scope">
+                              <option value="title">仅匹配标题</option>
+                              <option value="title_desc">匹配标题和漏洞描述</option>
+                            </select>
                           </div>
                         </div>
                         <!-- Success message -->
                         <!-- <p class="text-xs text-slate-500 mt-3 italic">Thanks for subscribing!</p> -->
                       </div>
 
-                      <p class="mt-5 mb-5">注：推送样式及测试可点击<a class="text-sky-500" href="#" @click="check_hook_url">[测试发送]</a>进行在线测试。安全验证方式可选择签名或关键字"漏洞情报"</p>
+                      <p class="mt-5 mb-5">注：推送样式及测试可点击<a class="text-sky-500" href="#" @click="check_hook_url">[测试发送]</a>进行在线测试。安全验证方式可选择签名或关键字"漏洞情报"。关键词过滤仅影响正式推送任务，不影响测试发送。</p>
                       <Banner2 v-if="setting_result.type" type="error" :open="banner2ErrorOpen">
                         {{ setting_result.msg }}
                       </Banner2>
@@ -165,29 +198,64 @@ export default {
   },
   computed: {
     ...mapGetters({vuli_push_url: 'stateVuliPushUrl', setting_result: 'stateSettingResult'}),
-    selectedValue: {
-      get() {
-        return this.vuli_push_url.push_type;
+  },
+  watch: {
+    vuli_push_url: {
+      immediate: true,
+      handler(value) {
+        const config = value || {}
+        this.form.push_type = config.push_type || 'dingding'
+        this.form.hook_url = config.hook_url || ''
+        this.form.sign = config.sign || ''
+        this.form.keywords = Array.isArray(config.keywords) ? config.keywords : []
+        this.form.keyword_match_scope = config.keyword_match_scope || 'title'
       }
     }
   },
   methods: {
+    addKeyword() {
+      const value = (this.keywordInput || '').trim()
+      if (!value) return
+      if (this.form.keywords.includes(value)) {
+        this.keywordInput = ''
+        return
+      }
+      this.form.keywords.push(value)
+      this.keywordInput = ''
+    },
+    removeKeyword(idx) {
+      this.form.keywords.splice(idx, 1)
+    },
     update_hook_url(){
-      const push_type = this.$refs.push_type.value;
-      const hook_url = this.$refs.hook_url.value;
-      const sign = this.$refs.sign.value;
-      this.$store.dispatch('setVuliPushUrl', {'push_type': push_type, 'hook_url': hook_url, 'sign': sign});
+      this.$store.dispatch('setVuliPushUrl', {
+        'push_type': this.form.push_type,
+        'hook_url': this.form.hook_url,
+        'sign': this.form.sign,
+        'keywords': this.form.keywords,
+        'keyword_match_scope': this.form.keyword_match_scope
+      });
     },
     check_hook_url(){
-      const push_type = this.$refs.push_type.value;
-      const hook_url = this.$refs.hook_url.value;
-      const sign = this.$refs.sign.value;
-      this.$store.dispatch('checkVuliPushUrl', {'push_type': push_type, 'hook_url': hook_url, 'sign': sign});
+      this.$store.dispatch('checkVuliPushUrl', {
+        'push_type': this.form.push_type,
+        'hook_url': this.form.hook_url,
+        'sign': this.form.sign,
+        'keywords': this.form.keywords,
+        'keyword_match_scope': this.form.keyword_match_scope
+      });
     },
 
   },
   data(){
     return {
+      keywordInput: '',
+      form: {
+        push_type: 'dingding',
+        hook_url: '',
+        sign: '',
+        keywords: [],
+        keyword_match_scope: 'title'
+      },
       options: [
          {name: '钉钉群机器人', value: 'dingding'},
          {name: '飞书群机器人', value: 'feishu'},
